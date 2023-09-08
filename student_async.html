@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生列表</title>
+</head>
+
+<body>
+    <div>
+        <div class="title">学生列表</div>
+        <div class="thead">
+            <div class="row bold">
+                <div class="col">编号</div>
+                <div class="col">姓名</div>
+                <div class="col">性别</div>
+                <div class="col">年龄</div>
+            </div>
+        </div>
+        <div class="tbody">
+        </div>
+    </div>
+
+    <template id="tp">
+        <div class="row">
+            <div class="col">xx</div>
+            <div class="col">xx</div>
+            <div class="col">xx</div>
+            <div class="col">xx</div>
+        </div>
+    </template>
+
+    <script>
+        fetch('students.json')
+            .then( resp => resp.json() )
+            .then( array => {
+                const tp = document.getElementById("tp");
+                const row = tp.content;
+                const [c1,c2,c3,c4] = row.querySelectorAll(".col");
+                const tbody = document.querySelector('.tbody');
+                for(const {id,name,sex,age} of array) {
+                    c1.textContent = id;
+                    c2.textContent = name;
+                    c3.textContent = sex;
+                    c4.textContent = age;
+                    // 复制元素
+                    const newRow = document.importNode(row, true);
+                    // 建立父子关系
+                    tbody.appendChild(newRow);
+                }
+            })
+            .catch( e => console.log(e) )
+    
+        
+    </script>
+
+    <style>
+        html,
+        body {
+            font-family: 华文行楷;
+            font-size: 20px;
+        }
+
+        .title {
+            margin-bottom: 10px;
+            font-size: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .row {
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+        }
+
+        .col {
+            border: 1px solid #f0f0f0;
+            width: 15%;
+            height: 35px;
+            text-align: center;
+            line-height: 35px;
+        }
+
+        .bold .col {
+            background-color: #f1f1f1;
+        }
+    </style>
+</body>
+
+</html>
