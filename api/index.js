@@ -14,11 +14,13 @@ app.get('/api', (req, res) => {
     res.json({'secret': baseApi});
 });
 
-app.get("/api/item/:slug", (req, res) => {
+app.get("api/item/:slug", (req, res) => {
     const { slug } = req.params;
     res.end(`Item: ${slug}`);
 });
 
+const chat = require('./chat.js')
+app.use('/api/chat', chat);
 
 const port = process.env.ENV_PORT || 3000;
 app.listen(port, () => {
