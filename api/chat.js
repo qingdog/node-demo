@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 
-router.get("/", (req, res) => {
+router.get("/chat", (req, res) => {
     res.end("this is chat2!");
 });
 
-router.get("/hello", (req, res) => {
+router.get("/chat/hello", (req, res) => {
     res.end("hello chat!");
 });
 
