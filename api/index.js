@@ -2,6 +2,7 @@ const express = require('express');
 const app = express()
 module.exports = app;
 
+// 开发环境
 const {createProxyMiddleware} = require('http-proxy-middleware');
 app.use('/proxy', createProxyMiddleware({target: 'http://localhost:8080', changeOrigin: true}));
 app.use(express.static('./'))

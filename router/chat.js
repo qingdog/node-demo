@@ -8,6 +8,7 @@ router.use((req, res, next) => {
 })
 // define the home page route
 router.get('/', (req, res) => {
+    console.info('this is route chat.js')
     res.send('Birds home page')
 })
 
