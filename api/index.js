@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express()
 
-const {createProxyMiddleware} = require('http-proxy-middleware');
-app.use('/proxy', createProxyMiddleware({target: 'http://localhost:8080', changeOrigin: true}));
-app.use(express.static('./'))
+// const {createProxyMiddleware} = require('http-proxy-middleware');
+// app.use('/proxy', createProxyMiddleware({target: 'http://localhost:8080', changeOrigin: true}));
+// app.use(express.static('./'))
 
 const port = process.env.ENV_PORT || 7070;
 app.listen(port, () => {
