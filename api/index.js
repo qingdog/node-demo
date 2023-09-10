@@ -6,9 +6,9 @@ const app = express()
 // app.use(express.static('./'))
 
 const port = process.env.ENV_PORT || 7070;
-app.listen(port, () => {
-    console.log(`Server is running on http://0.0.0.0:${port}`);
-});
+// app.listen(port, () => {
+//     console.log(`Server is running on http://0.0.0.0:${port}`);
+// });
 
 // 导入 env
 require('dotenv').config();
