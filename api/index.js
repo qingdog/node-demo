@@ -20,6 +20,7 @@ app.get('/api', (req, res) => {
     res.json({'secret': baseApi});
 });
 
+// 配置vercel重写以下api请求。"rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
 app.get("/api/item/:slug", (req, res) => {
     const {slug} = req.params;
     res.end(`Item: ${slug}`);
