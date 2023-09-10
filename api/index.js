@@ -29,8 +29,8 @@ app.get("/api/chat", (req, res) => {
     res.end('this is index chat!');
 });
 
-// const chat = require('./chat')
-// app.use('/api', chat);
+const chat = require('./api')
+app.use('/api', chat);
 
 // app.get("/api/chat", (req, res) => {
 //     res.end("this is chat2!");
