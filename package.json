@@ -1,5 +1,8 @@
 {
   "type": "commonjs",
+  "scripts": {
+    "start": "node main.js"
+  },
   "devDependencies": {
     "express": "^4.18.1",
     "http-proxy-middleware": "^2.0.6"
