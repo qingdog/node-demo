@@ -27,5 +27,17 @@ app.get("/api/item/:slug", (req, res) => {
     res.end(`Item: ${slug}`);
 });
 
+const path = require('path');
+app.get('/favicon.ico', (req, res) => {
+    const imagePath = path.join(__dirname, 'favicon.ico');
+
+    res.sendFile(imagePath, (err) => {
+        if (err) {
+            console.error(`Error sending file: ${err}`);
+            res.status(404).send('Image not found');
+        }
+    });
+});
+
 const chat = require('../router/chat.js')
 app.use('/api/chat', chat);
