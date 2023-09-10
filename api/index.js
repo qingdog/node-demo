@@ -5,7 +5,7 @@ const {createProxyMiddleware} = require('http-proxy-middleware');
 app.use('/proxy', createProxyMiddleware({target: 'http://localhost:8080', changeOrigin: true}));
 app.use(express.static('./'))
 
-const port = process.env.ENV_PORT || 3000;
+const port = process.env.ENV_PORT || 7070;
 app.listen(port, () => {
     console.log(`Server is running on http://0.0.0.0:${port}`);
 });
@@ -26,5 +26,5 @@ app.get("/api/item/:slug", (req, res) => {
     res.end(`Item: ${slug}`);
 });
 
-const chat = require('./api-chat')
+const chat = require('./api-chat.js')
 app.use('/api/api-chat', chat);
