@@ -21,17 +21,9 @@ app.get('/api', (req, res) => {
 });
 
 app.get("/api/item/:slug", (req, res) => {
-    const { slug } = req.params;
+    const {slug} = req.params;
     res.end(`Item: ${slug}`);
 });
 
-app.get("/api/chat", (req, res) => {
-    res.end('this is index chat!');
-});
-
-const chat = require('./api')
+const chat = require('./api-chat')
 app.use('/api', chat);
-
-// app.get("/api/chat", (req, res) => {
-//     res.end("this is chat2!");
-// });
