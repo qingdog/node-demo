@@ -14,6 +14,11 @@ app.get('/api', (req, res) => {
     res.json({'secret': baseApi});
 });
 
+app.get("/api/item/:slug", (req, res) => {
+    const { slug } = req.params;
+    res.end(`Item: ${slug}`);
+});
+
 
 const port = process.env.ENV_PORT || 3000;
 app.listen(port, () => {
