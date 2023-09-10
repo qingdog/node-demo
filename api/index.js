@@ -25,6 +25,10 @@ app.get("/api/item/:slug", (req, res) => {
     res.end(`Item: ${slug}`);
 });
 
+app.get("/api/chat2", (req, res) => {
+    res.end(`Item: `);
+});
+
 // const chat = require('./chat')
 // app.use('/api', chat);
 
