@@ -26,5 +26,5 @@ app.get("/api/item/:slug", (req, res) => {
     res.end(`Item: ${slug}`);
 });
 
-const chat = require('./api/router-chat.js')
-app.use('/api/router-chat', chat);
+const chat = require('../router/router-chat.js')
+app.use('/router/router-chat', chat);
