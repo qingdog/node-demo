@@ -58,7 +58,7 @@ router.get("/", (req, res) => {
     res.json('hello v1!')
 });
 
-router.get("/v1/item/:slug", (req, res) => {
+router.get("/item/:slug", (req, res) => {
     const {slug} = req.params;
     res.end(`Item: ${slug}`);
 });
