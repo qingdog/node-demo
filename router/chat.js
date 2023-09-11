@@ -9,7 +9,7 @@ router.use((req, res, next) => {
     next()
 })
 
-router.get('/chat/completions', (req, res) => {
+router.post('/chat/completions', (req, res) => {
     res.setHeader('Content-type', 'Content-type: application/octet-stream');
 
     let rawData = '';
