@@ -46,16 +46,16 @@ app.get('/api', (req, res) => {
 });
 
 const path = require('path');
-app.get('/favicon.ico', (req, res) => {
-    const imagePath = path.join(__dirname, 'favicon.ico');
-
-    res.sendFile(imagePath, (err) => {
-        if (err) {
-            console.error(`Error sending file: ${err}`);
-            res.status(404).send('Image not found');
-        }
-    });
-});
+// app.get('/favicon.ico', (req, res) => {
+//     const imagePath = path.join(__dirname, 'favicon.ico');
+//
+//     res.sendFile(imagePath, (err) => {
+//         if (err) {
+//             console.error(`Error sending file: ${err}`);
+//             res.status(404).send('Image not found');
+//         }
+//     });
+// });
 
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
 const v1 = require('../router/v1.js')
