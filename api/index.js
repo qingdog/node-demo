@@ -2,6 +2,10 @@ const express = require('express');
 const app = express()
 module.exports = app;
 
+const cors = require('cors');
+// 使用 CORS 中间件，跨域
+app.use(cors());
+
 // 开发环境
 const {createProxyMiddleware} = require('http-proxy-middleware');
 app.use('/proxy', createProxyMiddleware({target: 'http://localhost:8080', changeOrigin: true}));

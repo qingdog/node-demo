@@ -28,7 +28,7 @@ const requestBodyData = {
 // 这里使用无参箭头函数包装，不需要启动后立即执行。
 const chat = (requestData) => new Promise((resolve, reject) => {
     const data = requestData || requestBodyData;
-    console.info(data)
+    console.info(data.messages)
     axios({
         method: 'post',
         url: chatUri,
