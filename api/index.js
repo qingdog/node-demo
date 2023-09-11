@@ -7,19 +7,30 @@ const {createProxyMiddleware} = require('http-proxy-middleware');
 app.use('/proxy', createProxyMiddleware({target: 'http://localhost:8080', changeOrigin: true}));
 app.use(express.static('./'))
 
-const port = process.env.ENV_PORT || 7070;
+// 导入 env
+const dotenv = require('dotenv');
+const envFiles = [
+    '.env.development', // 优先生效开发环境配置
+    '.env'              // 默认配置
+];
+for (const envFile of envFiles) {
+    dotenv.config({ path: envFile });
+}
+
+let port = process.env.ENV_DEV_PORT || 7070;
 app.listen(port, () => {
     console.log(`Server is running on http://0.0.0.0:${port}`);
 });
 
+// 使用 express.json() 中间件来解析 JSON 请求体
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// 导入 env
-require('dotenv').config();
-const baseApi = process.env.ENV_BASE_API;
 
 app.get('/api', (req, res) => {
     res.setHeader('Content-Type', 'application/json;charset=utf-8');
-    res.json({'secret': baseApi});
+    const chatApi = process.env.ENV_CHAT_API;
+    res.json({'secret': chatApi});
 });
 
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
@@ -41,4 +52,4 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 const chat = require('../router/chat.js')
-app.use('/api/chat', chat);
+app.use('/api/v1', chat);
