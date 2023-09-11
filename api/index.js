@@ -38,15 +38,13 @@ app.listen(port, () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.get('/api', (req, res) => {
     res.setHeader('Content-Type', 'application/json;charset=utf-8');
     const chatApi = process.env.ENV_CHAT_API;
     res.json({'secret': chatApi});
 });
 
-// 配置vercel重写以下api请求。"rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
-app.get("/v1/:slug", (req, res) => {
+app.get("/api/:slug", (req, res) => {
     const {slug} = req.params;
     res.end(`Item: ${slug}`);
 });
@@ -63,8 +61,6 @@ app.get('/favicon.ico', (req, res) => {
     });
 });
 
-const chat = require('../router/chat.js')
-app.use('/api/v1', chat);
-
+// 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
 const v1 = require('../router/v1.js')
 app.use('/v1', v1);
