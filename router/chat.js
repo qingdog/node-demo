@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-
-
 const {chat} = require('../request/chat.js');
 
 // middleware that is specific to this router
@@ -11,7 +9,7 @@ router.use((req, res, next) => {
     next()
 })
 
-router.post('/chat/completions', (req, res) => {
+router.get('/chat/completions', (req, res) => {
     res.setHeader('Content-type', 'Content-type: application/octet-stream');
 
     let rawData = '';

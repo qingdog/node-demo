@@ -3,8 +3,16 @@ const app = express()
 module.exports = app;
 
 const cors = require('cors');
-// 使用 CORS 中间件，跨域
-app.use(cors());
+// const corsOptions = {
+//     origin: 'http://example.com', // 允许的源
+//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 允许的方法
+//     credentials: true, // 是否允许发送凭证（如cookies）
+//     optionsSuccessStatus: 204 // 对于预检请求，设置为204表示成功
+// };
+// app.use(cors(corsOptions));
+
+// 使用 CORS 中间件，不限制任何源进行跨域请求
+// app.use(cors());
 
 // 开发环境
 const {createProxyMiddleware} = require('http-proxy-middleware');
@@ -21,7 +29,7 @@ for (const envFile of envFiles) {
     dotenv.config({ path: envFile });
 }
 
-let port = process.env.ENV_DEV_PORT || 7070;
+let port = process.env.ENV_DEV_PORT || 3000;
 app.listen(port, () => {
     console.log(`Server is running on http://0.0.0.0:${port}`);
 });

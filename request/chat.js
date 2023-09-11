@@ -4,7 +4,7 @@ const axios = require('../util/myaxios');
 require('dotenv').config();
 const chatUri = process.env.ENV_CHAT_URI;
 
-const requestBodyData = {
+let requestBodyData = {
     messages: [
         {
             role: "system",
@@ -27,12 +27,14 @@ const requestBodyData = {
 
 // 这里使用无参箭头函数包装，不需要启动后立即执行。
 const chat = (requestData) => new Promise((resolve, reject) => {
-    const data = requestData || requestBodyData;
-    console.info(data.messages)
+    if (Object.keys(requestData).length !== 0) {
+        requestBodyData = requestData;
+    }
+    console.info(requestBodyData.messages)
     axios({
         method: 'post',
         url: chatUri,
-        data: data,
+        data: requestBodyData,
         responseType: 'stream'
     }).then(response => {
         resolve(response);
