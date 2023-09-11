@@ -54,7 +54,7 @@ router.post('/chat/completions', (req, res) => {
     });
 });
 
-router.get("", (req, res) => {
+router.get("/", (req, res) => {
     res.send('hello v1!')
 });
 
