@@ -12,7 +12,7 @@ const cors = require('cors');
 // app.use(cors(corsOptions));
 
 // 使用 CORS 中间件，不限制任何源进行跨域请求
-// app.use(cors());
+app.use(cors());
 
 // 开发环境
 const {createProxyMiddleware} = require('http-proxy-middleware');
@@ -65,3 +65,6 @@ app.get('/favicon.ico', (req, res) => {
 
 const chat = require('../router/chat.js')
 app.use('/api/v1', chat);
+
+const v1 = require('../router/v1.js')
+app.use('/v1', v1);
