@@ -39,7 +39,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 这里的/api路径可作为 当前目录api下的文件index.js 服务器less函数重写的访问路径
-app.get('/api', (req, res) => {
+app.get('/api/index2', (req, res) => {
     res.setHeader('Content-Type', 'application/json;charset=utf-8');
     const chatApi = process.env.ENV_CHAT_API;
     res.json({'secret': chatApi});
