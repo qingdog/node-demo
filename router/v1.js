@@ -55,8 +55,12 @@ router.post('/chat/completions', (req, res) => {
 });
 
 router.get("/", (req, res) => {
-    res.send('hello v1!')
+    res.json('hello v1!')
 });
 
+router.get("/v1/item/:slug", (req, res) => {
+    const {slug} = req.params;
+    res.end(`Item: ${slug}`);
+});
 
 module.exports = router;

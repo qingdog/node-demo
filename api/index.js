@@ -38,15 +38,11 @@ app.listen(port, () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// /api路径可作为 当前文件index.js 服务器less函数重写的访问路径
 app.get('/api', (req, res) => {
     res.setHeader('Content-Type', 'application/json;charset=utf-8');
     const chatApi = process.env.ENV_CHAT_API;
     res.json({'secret': chatApi});
-});
-
-app.get("/api/:slug", (req, res) => {
-    const {slug} = req.params;
-    res.end(`Item: ${slug}`);
 });
 
 const path = require('path');
