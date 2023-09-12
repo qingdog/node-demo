@@ -143,7 +143,22 @@ router.post('/chat/completions2', (req, res) => {
 
 const axios = require('../util/myaxios');
 
-
+let resData = {
+    "id": "chatcmpl-7xx584ZRr5PxiHRVZKlqYx7vKuRsM",
+    "object": "chat.completion.chunk",
+    "created": 1694522818,
+    "model": "gpt-3.5-turbo-0301",
+    "choices": [
+        {
+            "index": 0,
+            "delta": {
+                "role": "assistant",
+                "content": "嘿嘿嘿嘿嘿！"
+            },
+            "finish_reason": null
+        }
+    ]
+}
 router.post('/chat/completions', (req, res) => {
     res.setHeader('Content-type', 'text/event-stream; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache');
@@ -152,6 +167,10 @@ router.post('/chat/completions', (req, res) => {
     let rawData = '';
 
     let content = '';
+
+    res.write(`data: ${JSON.stringify(resData)}\n\n`);
+
+
     // 请求体数据，express解析需要app.use(express.json());
     chat(req.body).then(response => {
         response.data.on('data', (chunk) => {
@@ -186,7 +205,6 @@ router.post('/chat/completions', (req, res) => {
             console.info(content)
             res.end()
         });
-
 
         // const chunks = response.data.split('\n');
         // for (let i = 0; i < chunks.length; i++) {

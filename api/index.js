@@ -73,7 +73,7 @@ let resData = {
 
 // fix.https://github.com/vercel/ai/issues/239
 // ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
-module.exports = {
+export const config = {
     supportsResponseStreaming: true,
 }
 
