@@ -35,6 +35,9 @@ const chat = (requestData) => new Promise((resolve, reject) => {
         method: 'post',
         url: chatUri,
         data: requestBodyData,
+        headers: {
+            'Content-Type': 'text/event-stream'
+        },
         responseType: 'stream'
     }).then(response => {
 
