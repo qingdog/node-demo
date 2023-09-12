@@ -52,7 +52,7 @@ app.get('/api', (req, res) => {
 
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
 const v1 = require('../router/v1.js')
-app.use('/v11', v1);
+app.use('/v1', v1);
 
 let resData = {
     "id": "chatcmpl-7xx584ZRr5PxiHRVZKlqYx7vKuRsM",
@@ -71,11 +71,13 @@ let resData = {
     ]
 }
 
-export const config = {
+// fix.https://github.com/vercel/ai/issues/239
+// ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
+module.exports = {
     supportsResponseStreaming: true,
 }
 
-app.post('/v1/chat/completions', (req, res) => {
+app.post('/v1/chat/test', (req, res) => {
     const message = "123456789"
     res.set({
         'Content-Type': 'text/event-stream',
