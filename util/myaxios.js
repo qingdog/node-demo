@@ -1,7 +1,6 @@
 const axios = require('axios');
 
 // 导入 env
-require('dotenv').config();
 const chatApi = process.env.ENV_CHAT_API;
 const chatApiSecret = process.env.ENV_CHAT_API_SECRET;
 

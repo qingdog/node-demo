@@ -1,7 +1,6 @@
 const axios = require('../util/myaxios');
 
 // 导入 env
-require('dotenv').config();
 const chatUri = process.env.ENV_CHAT_URI;
 
 let requestBodyData = {

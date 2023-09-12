@@ -1,0 +1,23 @@
+# 聊天
+POST http://0.0.0.0/v1/chat/completions
+Content-Type: application/json
+
+{
+    "messages": [
+        {
+          "role":"system",
+          "content":"You are ChatGPT, a large language model trained by OpenAI.\nCarefully heed the user's instructions. \nRespond using Markdown."
+        },
+        {
+          "role":"user",
+          "content":"你好啊"
+        }
+    ],
+    "model":"gpt-3.5-turbo",
+    "max_tokens":null,
+    "temperature":1,
+    "presence_penalty":0,
+    "top_p":1,
+    "frequency_penalty":0,
+    "stream":true
+}
