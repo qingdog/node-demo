@@ -144,7 +144,9 @@ router.post('/chat/completions2', (req, res) => {
 
 
 router.post('/chat/completions', (req, res) => {
-    res.setHeader('Content-type', 'Content-type: text/event-stream');
+    res.setHeader('Content-type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
 
     let rawData = '';
 
