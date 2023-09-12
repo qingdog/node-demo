@@ -21,7 +21,7 @@ app.all('*', (_, res, next) => {
 
 // 开发环境
 const {createProxyMiddleware} = require('http-proxy-middleware');
-app.use('/proxy', createProxyMiddleware({target: 'http://localhost:8080', changeOrigin: true}));
+app.use('/v1', createProxyMiddleware({target: 'https://api.chatanywhere.com.cn', changeOrigin: true}));
 app.use(express.static('./'))
 
 // 导入 env
@@ -52,4 +52,4 @@ app.get('/api', (req, res) => {
 
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
 const v1 = require('../router/v1.js')
-app.use('/v1', v1);
+app.use('/v11', v1);
