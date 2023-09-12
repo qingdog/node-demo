@@ -141,6 +141,7 @@ router.post('/chat/completions2', (req, res) => {
 
 });
 
+const axios = require('../util/myaxios');
 
 
 router.post('/chat/completions', (req, res) => {
@@ -152,10 +153,25 @@ router.post('/chat/completions', (req, res) => {
 
     let content = '';
     // 请求体数据，express解析需要app.use(express.json());
-    chat(req.body).then(response => {
+    axios({
+        method: 'post',
+        url: chatUri,
+        data: req.body,
+        headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        },
+        // responseType: 'stream'
+        responseType: 'stream'
+    }).then(response => {
         response.data.on('data', (chunk) => {
             // 将字节转换为 UTF-8 字符串
             const decodedChunk = chunk.toString('UTF-8');
+
+            // 将数据写入响应流
+            res.write(decodedChunk);
+
 
             rawData += decodedChunk; // 将chunk转换成字符串拼接到rawData中
             const chunks = rawData.split('\n\n'); // 根据SSE的规范，每个消息以两个换行符分隔
@@ -175,19 +191,23 @@ router.post('/chat/completions', (req, res) => {
                     }
                 }
             }
-
-            // 将数据写入响应流
-            res.write(decodedChunk);
         });
-
-        // chat(req.body).then(response => {
-        //     res.write(response);
-        // });
 
         response.data.on('end', () => {
             console.info(content)
             res.end()
         });
+
+
+        // const chunks = response.data.split('\n');
+        // for (let i = 0; i < chunks.length; i++) {
+        //     let chunk = chunks[i];
+        //     if (chunks.length -1 !== i) {
+        //         chunk += '\n'
+        //     }
+        //     res.write(chunk);
+        // }
+        // res.end()
     }).catch(error => {
         console.error('错误：', error);
         res.status(500).send('Internal Server Error');

@@ -36,12 +36,17 @@ const chat = (requestData) => new Promise((resolve, reject) => {
         url: chatUri,
         data: requestBodyData,
         headers: {
-            'Content-Type': 'text/event-stream',
+            'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive'
         },
+        // responseType: 'stream'
         responseType: 'stream'
     }).then(response => {
+        // console.error(response.data)
+        // console.error(typeof(response.data))
+
+
 
         resolve(response);
 
