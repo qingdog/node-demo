@@ -46,13 +46,13 @@ const chat = (requestData) => new Promise((resolve, reject) => {
         resolve(response);
 
 
-        response.data.on('data', (chunk) => {
-            // const decodedChunk = chunk.toString('UTF-8'); // 将字节转换为 UTF-8 字符串
-            // resolve(decodedChunk);
-        });
-        response.data.on('end', () => {
-            // 数据接收完成的逻辑
-        });
+        // response.data.on('data', (chunk) => {
+        //     // const decodedChunk = chunk.toString('UTF-8'); // 将字节转换为 UTF-8 字符串
+        //     // resolve(decodedChunk);
+        // });
+        // response.data.on('end', () => {
+        //     // 数据接收完成的逻辑
+        // });
     }).catch(error => {
         reject(error);
     });
