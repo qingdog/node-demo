@@ -71,6 +71,10 @@ let resData = {
     ]
 }
 
+export const config = {
+    supportsResponseStreaming: true,
+}
+
 app.post('/v1/chat/completions', (req, res) => {
     const message = "123456789"
     res.set({

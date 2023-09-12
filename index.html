@@ -107,14 +107,25 @@
 
     fetchSendButton.addEventListener('click', () => {
         const message = messageInput.value;
-        fetch(`/v1/chat/completions?message=${message}`, {
+        fetch(`/v1/chat/completions`, {
             method: 'post',
             headers: {
                 accept: 'text/event-stream',
                 'Content-Type': 'application/json',
             },
         }).then((res) => {
-            console.log(`fetch请求返回结果~`, res.data);
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+
+            reader.read().then(function processText({ done, value }) {
+                if (done) {
+                    console.log('Stream finished');
+                    return;
+                }
+
+                console.log(decoder.decode(value));
+                return reader.read().then(processText);
+            });
         });
     });
 
