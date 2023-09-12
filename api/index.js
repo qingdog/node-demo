@@ -84,6 +84,7 @@ app.post('/v1/chat/completions', (req, res) => {
         if (step === 10) {
 
             res.write(`data: ${JSON.stringify(data2)}\n\n`);
+            res.write(`data: ${JSON.stringify(data3)}\n\n`);
 
             res.end()
             clearInterval(time)
