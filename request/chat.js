@@ -1,5 +1,4 @@
-const axios = require('../util/myaxios');
-const stream = require("stream");
+import axios from '../util/myaxios.js'
 
 // 导入 env
 const chatUri = process.env.ENV_CHAT_URI;
@@ -26,7 +25,7 @@ let requestBodyData = {
 };
 
 // 这里使用无参箭头函数包装，不需要启动后立即执行。
-const chat = (requestData) => new Promise((resolve, reject) => {
+export const chat = (requestData) => new Promise((resolve, reject) => {
     if (Object.keys(requestData).length !== 0) {
         requestBodyData = requestData;
     }
@@ -59,7 +58,3 @@ const chat = (requestData) => new Promise((resolve, reject) => {
         reject(error);
     });
 });
-
-module.exports = {
-    chat
-}

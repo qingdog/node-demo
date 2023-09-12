@@ -1,13 +1,8 @@
-const express = require('express');
+import express from 'express'
 const router = express.Router();
 
-const {v4: uuidv4} = require('uuid');
-const clientId = uuidv4();
-const EventSource = require('eventsource');
-
-
-const {chat} = require('../request/chat.js');
-const {fetchEventSource, EventStreamContentType} = require("@microsoft/fetch-event-source");
+import EventSource from 'eventsource'
+import {chat} from '../request/chat.js'
 
 // middleware that is specific to this router
 router.use((req, res, next) => {
@@ -73,7 +68,7 @@ router.post('/chat/completions2', (req, res) => {
         }, body: data
     });
 
-    const eventSource = new EventSource(url, { headers , body: data});
+    const eventSource = new EventSource(url, {headers, body: data});
 
     eventSource.onopen = (event) => {
         console.log('Connection opened:', event);
@@ -89,7 +84,6 @@ router.post('/chat/completions2', (req, res) => {
     eventSource.onerror = (error) => {
         console.error('EventSource failed:', error);
     };
-
 
 
     es.onerror = (error) => {
@@ -141,7 +135,6 @@ router.post('/chat/completions2', (req, res) => {
 
 });
 
-const axios = require('../util/myaxios');
 
 let resData = {
     "id": "chatcmpl-7xx584ZRr5PxiHRVZKlqYx7vKuRsM",
@@ -225,4 +218,5 @@ router.get("/", (req, res) => {
     res.send('hello v1!')
 });
 
-module.exports = router;
+// module.exports = router;
+export default router;

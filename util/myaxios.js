@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios'
 
 // 导入 env
 const chatApi = process.env.ENV_CHAT_API;
@@ -45,4 +45,6 @@ _axios.interceptors.response.use(
     }
 );
 
-module.exports = _axios;
+export default {
+    axios: _axios
+}

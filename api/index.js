@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express'
 const app = express()
-module.exports = app;
+// module.exports = app;
 
 // const cors = require('cors');
 // const corsOptions = {
@@ -20,12 +20,12 @@ app.all('*', (_, res, next) => {
 })
 
 // 开发环境
-const {createProxyMiddleware} = require('http-proxy-middleware');
+import {createProxyMiddleware} from 'http-proxy-middleware'
 app.use('/proxy', createProxyMiddleware({target: 'https://localhost:8080', changeOrigin: true}));
 app.use(express.static('./'))
 
 // 导入 env
-const dotenv = require('dotenv');
+import dotenv from 'dotenv'
 const envFiles = [
     '.env.development', // 优先生效开发环境配置
     '.env'              // 默认配置
@@ -51,7 +51,7 @@ app.get('/api', (req, res) => {
 });
 
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
-const v1 = require('../router/v1.js')
+import v1 from '../router/v1.js'
 app.use('/v1', v1);
 
 let resData = {
@@ -73,11 +73,9 @@ let resData = {
 
 // fix.https://github.com/vercel/ai/issues/239
 // ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
-// export const config = {
-//     supportsResponseStreaming: true,
-// }
-module.exports = {
-    supportsResponseStreaming: true
+export const config = {
+    // supportsResponseStreaming只能使用export语法
+    supportsResponseStreaming: true,
 }
 
 app.post('/v1/chat/test', (req, res) => {
