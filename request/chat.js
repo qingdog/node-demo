@@ -46,10 +46,7 @@ const chat = (requestData) => new Promise((resolve, reject) => {
         // console.error(response.data)
         // console.error(typeof(response.data))
 
-
-
         resolve(response);
-
 
         // response.data.on('data', (chunk) => {
         //     // const decodedChunk = chunk.toString('UTF-8'); // 将字节转换为 UTF-8 字符串

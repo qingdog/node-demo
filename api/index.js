@@ -2,7 +2,7 @@ const express = require('express');
 const app = express()
 module.exports = app;
 
-const cors = require('cors');
+// const cors = require('cors');
 // const corsOptions = {
 //     origin: 'http://example.com', // 允许的源
 //     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 允许的方法
@@ -10,9 +10,14 @@ const cors = require('cors');
 //     optionsSuccessStatus: 204 // 对于预检请求，设置为204表示成功
 // };
 // app.use(cors(corsOptions));
-
 // 使用 CORS 中间件，不限制任何源进行跨域请求
-app.use(cors());
+// app.use(cors());
+app.all('*', (_, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Headers', 'Content-Type')
+    res.header('Access-Control-Allow-Methods', '*')
+    next()
+})
 
 // 开发环境
 const {createProxyMiddleware} = require('http-proxy-middleware');

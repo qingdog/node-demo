@@ -153,18 +153,7 @@ router.post('/chat/completions', (req, res) => {
 
     let content = '';
     // 请求体数据，express解析需要app.use(express.json());
-    axios({
-        method: 'post',
-        url: chatUri,
-        data: req.body,
-        headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive'
-        },
-        // responseType: 'stream'
-        responseType: 'stream'
-    }).then(response => {
+    chat(req.body).then(response => {
         response.data.on('data', (chunk) => {
             // 将字节转换为 UTF-8 字符串
             const decodedChunk = chunk.toString('UTF-8');
