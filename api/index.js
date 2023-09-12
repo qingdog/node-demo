@@ -73,8 +73,11 @@ let resData = {
 
 // fix.https://github.com/vercel/ai/issues/239
 // ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
-export const config = {
-    supportsResponseStreaming: true,
+// export const config = {
+//     supportsResponseStreaming: true,
+// }
+module.exports = {
+    supportsResponseStreaming: true
 }
 
 app.post('/v1/chat/test', (req, res) => {
