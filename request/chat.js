@@ -1,4 +1,5 @@
 const axios = require('../util/myaxios');
+const stream = require("stream");
 
 // 导入 env
 const chatUri = process.env.ENV_CHAT_URI;
@@ -29,14 +30,16 @@ const chat = (requestData) => new Promise((resolve, reject) => {
     if (Object.keys(requestData).length !== 0) {
         requestBodyData = requestData;
     }
-    console.info(requestBodyData.messages)
+    console.info(requestBodyData.messages?.[requestBodyData.messages.length - 1])
     axios({
         method: 'post',
         url: chatUri,
         data: requestBodyData,
         responseType: 'stream'
     }).then(response => {
+
         resolve(response);
+
 
         response.data.on('data', (chunk) => {
             // const decodedChunk = chunk.toString('UTF-8'); // 将字节转换为 UTF-8 字符串

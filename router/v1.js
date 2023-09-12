@@ -180,6 +180,10 @@ router.post('/chat/completions', (req, res) => {
             res.write(decodedChunk);
         });
 
+        // chat(req.body).then(response => {
+        //     res.write(response);
+        // });
+
         response.data.on('end', () => {
             console.info(content)
             res.end()
