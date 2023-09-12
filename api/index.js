@@ -76,7 +76,6 @@ let resData = {
 export const config = {
     // supportsResponseStreaming只能使用export语法
     supportsResponseStreaming: true,
-}
 
 app.post('/v1/chat/test', (req, res) => {
     const message = "123456789"
