@@ -7,9 +7,7 @@ router.use((req, res, next) => {
     next()
 })
 
-// 导入 env
 const chatApi = process.env.ENV_CHAT_API;
-console.log(chatApi)//undefined
 const chatUri = process.env.ENV_CHAT_URI;
 const chatApiSecret = process.env.ENV_CHAT_API_SECRET;
 
@@ -160,7 +158,6 @@ router.post('/chat/completions', (req, res) => {
     let content = '';
 
     // res.write(`data: ${JSON.stringify(resData)}\n\n`);
-
 
     // 请求体数据，express解析需要app.use(express.json());
     chat(req.body).then(response => {

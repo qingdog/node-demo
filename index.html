@@ -7,94 +7,60 @@
     <title>首页</title>
 </head>
 <body>
-    <h1>Hello, world</h1>
+<h1>Hello, world</h1>
+
 <label for="message">Message:</label>
-<input type="text" id="message" name="message" />
+<input type="text" id="message" name="message"/>
 <button id="eventSend">EventSource发送</button>
 <button id="fetchSend">fetch发送</button>
 <button id="customSend">自定义发送</button>
+<div class="chat">
+
+</div>
 
 <script>
-    /**
-     * 将服务端格返回字符串尝试格式化为json
-     * @param {String} str
-     * @returns
-     */
-    const parase = (str) => {
-        if (typeof str !== 'string') {
-            return str;
-        }
-        try {
-            return JSON.parse(str.substring(6));
-        } catch (error) {
-            return str;
-        }
-    };
-
-    /**
-     * 将Uint8Array转换为字符串
-     * @param {Uint8Array} fileData
-     * @returns
-     */
-    const Uint8ArrayToString = (fileData) => {
-        const utf8 = Array.from(fileData)
-            .map((item) => String.fromCharCode(item))
-            .join('');
-
-        return decodeURIComponent(escape(utf8));
-    };
-
-    /**
-     * 基于fetch/ReadableStream 自定义封装的fetch请求
-     * @param {*} url 请求链接
-     * @param {*} params
-     * @returns
-     */
-    const fetchStream = (url, params) => {
-        const { onmessage, onclose, ...otherParams } = params;
-
-        const push = async (controller, reader) => {
-            const { value, done } = await reader.read();
-            if (done) {
-                controller.close();
-                onclose?.();
-            } else {
-                onmessage?.(Uint8ArrayToString(value));
-                controller.enqueue(value);
-                push(controller, reader);
-            }
-        };
-
-        return fetch(url, otherParams)
-            .then((response) => {
-                const reader = response.body.getReader();
-                const stream = new ReadableStream({
-                    start(controller) {
-                        push(controller, reader);
-                    },
-                });
-                return stream;
-            })
-            .then((stream) => new Response(stream, { headers: { 'Content-Type': 'text/html' } }).text());
-    };
-
     /** DOM节点 */
     const messageInput = document.getElementById('message');
     const eventSendButton = document.getElementById('eventSend');
     const fetchSendButton = document.getElementById('fetchSend');
     const customSendButton = document.getElementById('customSend');
 
-    // EventSource 对象发送
+
+    // EventSource 对象发送。原生EventSource只支持GET请求
     eventSendButton.addEventListener('click', () => {
         // 发送数据到服务端
         const message = messageInput.value;
         // 创建 EventSource 对象
-        const eventSource = new EventSource(`/stream?message=${message}`);
+        // const eventSource = new EventSource(`/v1/chat/completions`);
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        const data = JSON.stringify({
+            "messages": [
+                {
+                    "role":"system",
+                    "content":"You are ChatGPT, a large language model trained by OpenAI.\nCarefully heed the user's instructions. \nRespond using Markdown."
+                },
+                {
+                    "role":"user",
+                    "content":"你好啊"
+                }
+            ],
+            "model":"gpt-3.5-turbo",
+            "max_tokens":null,
+            "temperature":1,
+            "presence_penalty":0,
+            "top_p":1,
+            "frequency_penalty":0,
+            "stream":true
+        });
+        const eventSource = new EventSource('/v1/chat/completions', { headers, method: 'POST', body: data });
+
 
         eventSource.onopen = () => {
             console.log('Connection to server opened.');
         };
-
         // 监听服务器返回的数据
         eventSource.onmessage = (event) => {
             console.log(event.data);
@@ -105,6 +71,8 @@
         };
     });
 
+    // fetch发送请求
+    const chatContent = document.querySelector('.chat')
     fetchSendButton.addEventListener('click', () => {
         const message = messageInput.value;
         fetch(`/v1/chat/completions`, {
@@ -113,38 +81,135 @@
                 accept: 'text/event-stream',
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+                'mes': message
+            })
         }).then((res) => {
             const reader = res.body.getReader();
-            const decoder = new TextDecoder();
 
-            reader.read().then(function processText({ done, value }) {
+            function processValue({done, value}) {
                 if (done) {
-                    console.log('Stream finished');
+                    console.warn('Stream finished');
                     return;
                 }
+                const decoder = new TextDecoder();
+                const decode = decoder.decode(value);
+                fetchParseEventSource(decode).then(response => {
+                    function generateStreamNext() {
+                        const {value, done} = response.next();
+                        if (!done) {
+                            chatContent.innerHTML += value?.choices?.[0]?.delta.content || '';
+                            generateStreamNext();
+                        }
+                    }
 
-                console.log(decoder.decode(value));
-                return reader.read().then(processText);
-            });
+                    generateStreamNext();
+
+                    reader.read().then(processValue); // 递归调用下一个值
+                });
+            }
+
+            // 执行函数read函数，processValue为回调函数
+            reader.read().then(processValue);
         });
     });
 
+    const fetchParseEventSource = (str) => new Promise((resolve, reject) => {
+        if (typeof str !== 'string')
+            return str;
+        const split = str.split('data:');
+        if (split.length === 0)
+            reject(new Error(`不支持的格式 ${split}`));
+        console.info(split)
+        const stream = generateStream(split);
+        resolve(stream)
+    })
+
+    // 使用生成器函数 逐个返回数组的值
+    function* generateStream(split) {
+        for (let i = 0; i < split.length; i++) {
+            try {
+                if (split[i] === '[DONE]')
+                    break
+                if (split[i] === '')
+                    continue
+                yield JSON.parse(split[i])
+            } catch (error) {
+                yield split[i]
+            }
+        }
+    }
+
     // 自定义封装fetch 请求
     customSendButton.addEventListener('click', () => {
-        // 创建 EventSource 对象
         const message = messageInput.value;
+        // 自定义
         fetchStream(`/v1/chat/completions`, {
-            method: 'post',
+            method: 'POST',
             headers: {
                 accept: 'text/event-stream',
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+                'mes': message
+            }),
+            // 处理响应数据
             onmessage: (res) => {
-                const json = parase(res);
-                console.log(json);
+                chatContent.textContent += res;
+                // console.log(json);
             },
+        }).then((text) => {
+            // 响应完成后执行
+            //chatContent.textContent = text;
+        }).catch((error) => {
+            console.error('发生错误：', error);
         });
     });
+    /**
+     * 基于fetch/ReadableStream 自定义封装的fetch请求
+     * @param {*} url 请求链接
+     * @param {*} params
+     * @returns
+     */
+    const fetchStream = (url, params) => {
+        const {onmessage, onclose, ...otherParams} = params;
+
+        const textDecoder = new TextDecoder();
+        const readableStreamstartEnqueue = async (controller, reader) => {
+            const {value, done} = await reader.read();
+            if (done) {
+                controller.close();
+                // 此处没有定义该函数onclose，可以不执行
+                onclose?.();
+            } else {
+                // onmessage?.(Uint8ArrayToString(value));
+                // 执行传入的自定义函数（如果存在） TextDecoder解码读取的二进制数据Uint8Array 为文本string
+                onmessage?.(textDecoder.decode(value));
+
+                // 将一个值传递到流中以供读取。这相当于向流中推入一个数据块。类似追加入队
+                controller.enqueue(value);
+                // 递归调用处理响应reader.read
+                await readableStreamstartEnqueue(controller, reader);
+            }
+        };
+
+        return fetch(url, otherParams).then((response) => {
+            const reader = response.body.getReader();
+            const stream = new ReadableStream({
+                start(controller) {
+                    readableStreamstartEnqueue(controller, reader);
+                },
+            });
+            return stream;
+            // 非流式响应，可以不执行
+        }).then((stream) => new Response(stream, {headers: {'Content-Type': 'text/html'}}).text());
+    };
+
+    // 将Uint8Array转换为字符串
+    const Uint8ArrayToString = (fileData) => {
+        const utf8 = Array.from(fileData).map((item) => String.fromCharCode(item)).join('');
+        return decodeURIComponent(escape(utf8));
+    };
 </script>
 </body>
 </html>
