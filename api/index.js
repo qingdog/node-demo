@@ -1,7 +1,12 @@
 import express from 'express'
-const app = express()
-// module.exports = app;
+import {createProxyMiddleware} from 'http-proxy-middleware'
+import v1 from '../router/v1.js'
 
+// 环境变量放 myaxios 中
+// import dotenv from 'dotenv';
+// dotenv.config();
+
+const app = express()
 // const cors = require('cors');
 // const corsOptions = {
 //     origin: 'http://example.com', // 允许的源
@@ -20,19 +25,9 @@ app.all('*', (_, res, next) => {
 })
 
 // 开发环境
-import {createProxyMiddleware} from 'http-proxy-middleware'
 app.use('/proxy', createProxyMiddleware({target: 'https://localhost:8080', changeOrigin: true}));
 app.use(express.static('./'))
 
-// 导入 env
-import dotenv from 'dotenv'
-const envFiles = [
-    '.env.development', // 优先生效开发环境配置
-    '.env'              // 默认配置
-];
-for (const envFile of envFiles) {
-    dotenv.config({path: envFile});
-}
 
 let port = process.env.ENV_DEV_PORT || 3000;
 app.listen(port, () => {
@@ -51,7 +46,6 @@ app.get('/api', (req, res) => {
 });
 
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
-import v1 from '../router/v1.js'
 app.use('/v1', v1);
 
 let resData = {
@@ -102,3 +96,5 @@ app.post('/v1/chat/test', (req, res) => {
 
 let data2 = {"id":"chatcmpl-7xxHoj8mAdfvCZISNtptJxwExaYYW","object":"chat.completion.chunk","created":1694523604,"model":"gpt-3.5-turbo-0301","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
 let data3 = '[DONE]'
+
+// export default app;

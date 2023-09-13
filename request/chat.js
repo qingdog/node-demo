@@ -1,7 +1,5 @@
 import axios from '../util/myaxios.js'
 
-// 导入 env
-const chatUri = process.env.ENV_CHAT_URI;
 
 let requestBodyData = {
     messages: [
@@ -30,8 +28,10 @@ export const chat = (requestData) => new Promise((resolve, reject) => {
         requestBodyData = requestData;
     }
     console.info(requestBodyData.messages?.[requestBodyData.messages.length - 1])
+
+    const chatUri = process.env.ENV_CHAT_URI;
     axios({
-        method: 'post',
+        method: 'POST',
         url: chatUri,
         data: requestBodyData,
         headers: {
@@ -39,7 +39,6 @@ export const chat = (requestData) => new Promise((resolve, reject) => {
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive'
         },
-        // responseType: 'stream'
         responseType: 'stream'
     }).then(response => {
         // console.error(response.data)
@@ -50,8 +49,12 @@ export const chat = (requestData) => new Promise((resolve, reject) => {
         // response.data.on('data', (chunk) => {
         //     // const decodedChunk = chunk.toString('UTF-8'); // 将字节转换为 UTF-8 字符串
         //     // resolve(decodedChunk);
+        //     const decodedChunk = chunk.toString('UTF-8');
+        //     console.log(decodedChunk)
+        //     console.log('-------')
         // });
         // response.data.on('end', () => {
+        //
         //     // 数据接收完成的逻辑
         // });
     }).catch(error => {

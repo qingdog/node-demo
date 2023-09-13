@@ -1,10 +1,7 @@
-import express from 'express'
-const router = express.Router();
-
 import EventSource from 'eventsource'
 import {chat} from '../request/chat.js'
-
-// middleware that is specific to this router
+import express from 'express'
+const router = express.Router();
 router.use((req, res, next) => {
     console.log('时间戳：', Date.now())
     next()
@@ -12,6 +9,7 @@ router.use((req, res, next) => {
 
 // 导入 env
 const chatApi = process.env.ENV_CHAT_API;
+console.log(chatApi)//undefined
 const chatUri = process.env.ENV_CHAT_URI;
 const chatApiSecret = process.env.ENV_CHAT_API_SECRET;
 
@@ -76,7 +74,7 @@ router.post('/chat/completions2', (req, res) => {
 
     eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log(data); // 在控制台中查看收到的消息
+        // console.log(data); // 在控制台中查看收到的消息
 
         // 处理接收到的消息，可以在这里执行您的逻辑
     };
@@ -161,7 +159,7 @@ router.post('/chat/completions', (req, res) => {
 
     let content = '';
 
-    res.write(`data: ${JSON.stringify(resData)}\n\n`);
+    // res.write(`data: ${JSON.stringify(resData)}\n\n`);
 
 
     // 请求体数据，express解析需要app.use(express.json());
@@ -199,19 +197,11 @@ router.post('/chat/completions', (req, res) => {
             res.end()
         });
 
-        // const chunks = response.data.split('\n');
-        // for (let i = 0; i < chunks.length; i++) {
-        //     let chunk = chunks[i];
-        //     if (chunks.length -1 !== i) {
-        //         chunk += '\n'
-        //     }
-        //     res.write(chunk);
-        // }
-        // res.end()
     }).catch(error => {
         console.error('错误：', error);
         res.status(500).send('Internal Server Error');
-    });
+    }).finally(()=>{
+    })
 });
 
 router.get("/", (req, res) => {
