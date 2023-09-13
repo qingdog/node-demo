@@ -48,6 +48,13 @@ app.get('/api', (req, res) => {
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
 app.use('/v1', v1);
 
+// fix.https://github.com/vercel/ai/issues/239
+// ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
+export const config = {
+    // supportsResponseStreaming只能使用export语法
+    supportsResponseStreaming: true,
+}
+
 let resData = {
     "id": "chatcmpl-7xx584ZRr5PxiHRVZKlqYx7vKuRsM",
     "object": "chat.completion.chunk",
@@ -64,14 +71,6 @@ let resData = {
         }
     ]
 }
-
-// fix.https://github.com/vercel/ai/issues/239
-// ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
-export const config = {
-    // supportsResponseStreaming只能使用export语法
-    supportsResponseStreaming: true,
-}
-
 app.post('/v1/chat/test', (req, res) => {
     const message = "123456789"
     res.set({
