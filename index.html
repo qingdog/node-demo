@@ -13,7 +13,7 @@
 <input type="text" id="message" name="message"/>
 <button id="eventSend">EventSource发送</button>
 <button id="fetchSend">fetch发送</button>
-<button id="customSend">自定义发送</button>
+<button id="customSend">fetch+ReadableStream</button>
 <div class="chat">
 
 </div>
@@ -57,7 +57,6 @@
         });
         const eventSource = new EventSource('/v1/chat/completions', {headers, method: 'POST', body: data});
 
-
         eventSource.onopen = () => {
             console.log('Connection to server opened.');
         };
@@ -87,6 +86,7 @@
         }).then((res) => {
             const reader = res.body.getReader();
 
+            // 结构read方法后的返回值
             function processValue({done, value}) {
                 if (done) {
                     console.warn('Stream finished');
@@ -102,14 +102,14 @@
                             generateStreamNext();
                         }
                     }
-
                     generateStreamNext();
 
-                    reader.read().then(processValue); // 递归调用下一个值
+                    // 这里使用递归调用下一个值。而不是把方法改成异步后使用同步调用取值
+                    reader.read().then(processValue);
                 });
             }
 
-            // 执行函数read函数，processValue为回调函数
+            // 这里把reader.read()的返回值作为参数 processValue为回调函数
             reader.read().then(processValue);
         });
     });
@@ -193,16 +193,36 @@
             }
         };
 
-        return fetch(url, otherParams).then((response) => {
-            const reader = response.body.getReader();
-            const stream = new ReadableStream({
+        return fetch(url, otherParams).then(async (response) => {
+            const readableStreamDefaultReader = response.body.getReader();
+            // 这里把fetch的text/event-stream流又套了一层流进行处理 response数据
+            /*const stream = new ReadableStream({
                 start(controller) {
-                    readableStreamstartEnqueue(controller, reader);
+                    readableStreamstartEnqueue(controller, readableStreamDefaultReader);
                 },
-            });
-            return stream;
-            // 非流式响应，可以不执行
-        }).then((stream) => new Response(stream, {headers: {'Content-Type': 'text/html'}}).text());
+            });*/
+
+            readableStreamDefaultReader.closed.then(
+                () => console.info('readableStreamDefaultReader.closed'),
+                () => console.warn('readableStreamDefaultReader读取出错了')
+            );
+
+            const decoder = new TextDecoder();
+            let value;
+            try {
+                while (!({value} = await readableStreamDefaultReader.read()).done) {
+                    onmessage?.(decoder.decode(value));
+                }
+                return readableStreamDefaultReader;
+            } catch (e) {
+                console.error('错误：', e)
+            } finally {
+                readableStreamDefaultReader.releaseLock() //出现异常时需要此处关闭
+            }
+
+            return readableStreamDefaultReader;
+            // 之前把数据enqueue入队进入流中了，现在可使用Response进行转换为文本（文本解码），这里只是收集流中所有数据可不执行
+        })//.then((stream) => new Response(stream, {headers: {'Content-Type': 'text/html'}}).text());
     };
 
     // 解析EventSource格式字符串流响应
