@@ -205,46 +205,23 @@
         }).then((stream) => new Response(stream, {headers: {'Content-Type': 'text/html'}}).text());
     };
 
-
-    const parseEventSourceResponse2 = (res => {
-        const chunks = res.split('\n\n'); //根据SSE的规范，每个消息以两个换行符分隔
-        console.log(chunks)
-        for (const chunk of chunks) {
-            // chunk.trim();
-            const checkChunk = chunk.substring(6); //去除 "data: " 前缀
-            if (checkChunk) {
-                if ('[DONE]' === checkChunk)
-                    break;
-                try {
-                    const jsonData = JSON.parse(checkChunk);
-                    chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
-                } catch (error) {
-                    console.error('解析JSON失败：', error);
-                }
-            }
-        }
-    })
-
+    // 解析EventSource格式字符串流响应
     const parseEventSourceResponse = (res => {
-        const chunks = res.split('\n\ndata: '); //根据SSE的规范，每个消息以两个换行符分隔
-        console.log(chunks)
+        console.info(res)
+        // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
+        const chunks = res.replace(/data: ({)/gm, '$1').split('\n\n');
         for (const chunk of chunks) {
-            // chunk.trim();
-            if (!chunk) continue
-            if ('[DONE]\n\n' === chunk) break;
+            if ('' === chunk) continue //分割特性。字符串变成数组后，第一个和最后一个有可能为空字符串
+            if ('data: [DONE]' === chunk) {
+                console.warn('流已完成！' + chunk)
+                break
+            }
             try {
                 const jsonData = JSON.parse(chunk);
                 chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
             } catch (error) {
-                const checkChunk = chunk.substring(6); //去除 "data: " 前缀
-                if (!chunk) continue
-                try {
-                    const jsonData = JSON.parse(checkChunk);
-                    chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
-                } catch (error) {
-                    console.error('解析JSON失败：', error);
-                    console.error('字符串：', checkChunk);
-                }
+                console.error('解析JSON失败：', error);
+                console.error('JSON字符串：', chunk);
             }
         }
     })

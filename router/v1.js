@@ -11,6 +11,7 @@ const chatApi = process.env.ENV_CHAT_API;
 const chatUri = process.env.ENV_CHAT_URI;
 const chatApiSecret = process.env.ENV_CHAT_API_SECRET;
 
+// todo 尝试在nodejs环境上使用EventSource发送post请求，接收结果处理
 router.post('/chat/completions2', (req, res) => {
     console.log(chatApi + chatUri)
     // const es = new EventSource(chatApi + chatUri, {headers: {'Authorization': chatApiSecret}});
@@ -81,57 +82,15 @@ router.post('/chat/completions2', (req, res) => {
         console.error('EventSource failed:', error);
     };
 
-
     es.onerror = (error) => {
         console.error('错误：', error);
         es.close();
         res.send(error);
     };
 
-    // class RetriableError extends Error { }
-    // class FatalError extends Error { }
-    //
-    // fetchEventSource(url, {
-    //     method: 'POST',
-    //     headers,
-    //     body: JSON.stringify(data),
-    //
-    //     async onopen(response) {
-    //         if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
-    //             console.log(true)
-    //
-    //             return; // everything's good
-    //         } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-    //             // client-side errors are usually non-retriable:
-    //             throw new FatalError();
-    //         } else {
-    //             throw new RetriableError();
-    //         }
-    //     },
-    //     onmessage(msg) {
-    //         // if the server emits an error message, throw an exception
-    //         // so it gets handled by the onerror callback below:
-    //         if (msg.event === 'FatalError') {
-    //             throw new FatalError(msg.data);
-    //         }
-    //     },
-    //     onclose() {
-    //         // if the server closes the connection unexpectedly, retry:
-    //         throw new RetriableError();
-    //     },
-    //     onerror(err) {
-    //         if (err instanceof FatalError) {
-    //             throw err; // rethrow to stop the operation
-    //         } else {
-    //             // do nothing to automatically retry. You can also
-    //             // return a specific retry interval here.
-    //         }
-    //     }
-    // });
-
 });
 
-
+// 响应格式
 let resData = {
     "id": "chatcmpl-7xx584ZRr5PxiHRVZKlqYx7vKuRsM",
     "object": "chat.completion.chunk",
