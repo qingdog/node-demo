@@ -12,10 +12,10 @@
 <label for="message">Message:</label>
 <input type="text" id="message" name="message"/>
 <button id="eventSend">EventSource发送</button>
+<button id="eventClose" onclick="closeSSE()">EventSource关闭</button>
 <button id="fetchSend">fetch发送</button>
 <button id="customSend">fetch+ReadableStream</button>
 <div class="chat">
-
 </div>
 
 <script>
@@ -25,49 +25,9 @@
     const fetchSendButton = document.getElementById('fetchSend');
     const customSendButton = document.getElementById('customSend');
 
-
     // EventSource 对象发送。原生EventSource只支持GET请求
     eventSendButton.addEventListener('click', () => {
-        // 发送数据到服务端
-        const message = messageInput.value;
-        // 创建 EventSource 对象
-        // const eventSource = new EventSource(`/v1/chat/completions`);
-        const headers = {
-            'Content-Type': 'application/json',
-        };
-
-        const data = JSON.stringify({
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are ChatGPT, a large language model trained by OpenAI.\nCarefully heed the user's instructions. \nRespond using Markdown."
-                },
-                {
-                    "role": "user",
-                    "content": "你好啊"
-                }
-            ],
-            "model": "gpt-3.5-turbo",
-            "max_tokens": null,
-            "temperature": 1,
-            "presence_penalty": 0,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "stream": true
-        });
-        const eventSource = new EventSource('/v1/chat/completions', {headers, method: 'POST', body: data});
-
-        eventSource.onopen = () => {
-            console.log('Connection to server opened.');
-        };
-        // 监听服务器返回的数据
-        eventSource.onmessage = (event) => {
-            console.log(event.data);
-        };
-
-        eventSource.onerror = () => {
-            eventSource.close();
-        };
+        connectFetch()
     });
 
     // fetch发送请求
@@ -86,8 +46,7 @@
         }).then((res) => {
             const reader = res.body.getReader();
 
-            // 结构read方法后的返回值
-            function processValue({done, value}) {
+            function processValue({done, value}) { //解构调用read方法后的返回值
                 if (done) {
                     console.warn('Stream finished');
                     return;
@@ -102,18 +61,19 @@
                             generateStreamNext();
                         }
                     }
+
                     generateStreamNext();
 
                     // 这里使用递归调用下一个值。而不是把方法改成异步后使用同步调用取值
                     reader.read().then(processValue);
                 });
             }
-
             // 这里把reader.read()的返回值作为参数 processValue为回调函数
             reader.read().then(processValue);
         });
     });
 
+    // 待废弃
     const fetchParseEventSource = (str) => new Promise((resolve, reject) => {
         if (typeof str !== 'string')
             return str;
@@ -240,8 +200,8 @@
                 const jsonData = JSON.parse(chunk);
                 chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
             } catch (error) {
-                console.error('解析JSON失败：', error);
-                console.error('JSON字符串：', chunk);
+                chatContent.innerHTML += `<br>${chunk}<br>`
+                console.warn('JSON解析失败：', chunk);
             }
         }
     })
@@ -251,6 +211,83 @@
         const utf8 = Array.from(fileData).map((item) => String.fromCharCode(item)).join('');
         return decodeURIComponent(escape(utf8));
     };
+
 </script>
+<script>
+    const messageElement = chatContent
+    let controller // 建立 FETCH-SSE 连接
+    const connectFetch = () => {
+        const mes = messageInput.value;
+        // AbortController 是一个用于管理网络请求的接口，它允许你取消（中止）一个正在进行的网络请求。
+        controller = new AbortController() //类似xhr的 onabort 事件
+        fetchEventSource('/v1/chat/completions', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({'mes': mes}),
+            signal: controller.signal, //fetch接收 controller 的信号用于abort
+            onopen: () => {
+                messageElement.innerHTML += `FETCH 连接成功<br />`
+            },
+            onclose: () => {
+                messageElement.innerHTML += `FETCH 连接关闭<br />`
+            },
+            onmessage: (event) => {
+                console.log(event)
+                // const data = JSON.parse(event)
+                // messageElement.innerHTML += `${data.id} --- ${data.time} --- body参数：${JSON.stringify(data.body)}` + '<br />'
+
+                //closeSSE();
+            },
+            onerror: (e) => {
+                console.log(e)
+            }
+        })
+    }
+    // 断开 FETCH-SSE 连接
+    const closeSSE = () => {
+        if (controller) {
+            controller.abort()
+            controller = undefined
+            messageElement.innerHTML += `FETCH 连接手动关闭<br />`
+        }
+    }
+
+    function timeout(time = 10000) {
+        this.timer = window.setTimeout(() => {
+            closeSSE();
+            this.ontimeout?.(); // 外部若传入了监听超时回调，类似 onmessage
+        }, time);
+    }
+
+    const fetchEventSource = (url, options) => {
+        timeout(); // 开启超时计时器
+        fetch(url, options).then(response => {
+            if (response.status === 200) {
+                options.onopen && options.onopen()
+                return response.body
+            }
+        }).then(rb => {
+            clearTimeout(this.timer); // 拿到结果，清除 timeout 计时器
+
+            const reader = rb.getReader()
+            const push = () => {
+                // done 为数据流是否接收完成，boolean // value 为返回数据，Uint8Array
+                return reader.read().then(({done, value}) => {
+                    if (done) {
+                        console.log('close!!!')
+                        options.onclose && options.onclose()
+                        return
+                    }
+                    options?.onmessage(new TextDecoder().decode(value))
+                    // 持续读取流信息
+                    return push()
+                })
+            } // 开始读取流信息
+            return push()
+        }).catch((e) => {
+            options.error && options.error(e)
+        })
+    } </script>
+
 </body>
 </html>

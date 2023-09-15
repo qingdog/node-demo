@@ -55,45 +55,4 @@ export const config = {
     supportsResponseStreaming: true,
 }
 
-let resData = {
-    "id": "chatcmpl-7xx584ZRr5PxiHRVZKlqYx7vKuRsM",
-    "object": "chat.completion.chunk",
-    "created": 1694522818,
-    "model": "gpt-3.5-turbo-0301",
-    "choices": [
-        {
-            "index": 0,
-            "delta": {
-                "role": "assistant",
-                "content": "嘿"
-            },
-            "finish_reason": null
-        }
-    ]
-}
-app.post('/v1/chat/test', (req, res) => {
-    const message = "123456789"
-    res.set({
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-    });
-    let step = 0;
-    const time = setInterval(() => {
-        res.write(`data: ${JSON.stringify(resData)}\n\n`);
-        if (step === 10) {
-
-            res.write(`data: ${JSON.stringify(data2)}\n\n`);
-            res.write(`data: ${JSON.stringify(data3)}\n\n`);
-
-            res.end()
-            clearInterval(time)
-        }
-        step++;
-    }, 50);
-});
-
-let data2 = {"id":"chatcmpl-7xxHoj8mAdfvCZISNtptJxwExaYYW","object":"chat.completion.chunk","created":1694523604,"model":"gpt-3.5-turbo-0301","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
-let data3 = '[DONE]'
-
 // export default app;
