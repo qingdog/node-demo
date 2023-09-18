@@ -14,7 +14,7 @@ const chatApi = process.env.ENV_CHAT_API;
 const chatApiSecret = process.env.ENV_CHAT_API_SECRET;
 
 const _axios = axios.create({
-    baseURL: chatApi, withCredentials: true, timeout: 5000
+    baseURL: chatApi, withCredentials: true, timeout: 8000
 });
 
 // 9. 拦截器

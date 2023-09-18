@@ -189,7 +189,7 @@
     const parseEventSourceResponse = (res => {
         console.info(res)
         // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
-        const chunks = res.replace(/data: ({)/gm, '$1').split('\n\n');
+        const chunks = res.replace(/^data: ({)/gm, '$1').split('\n\n');
         for (const chunk of chunks) {
             if ('' === chunk) continue //分割特性。字符串变成数组后，第一个和最后一个有可能为空字符串
             if ('data: [DONE]' === chunk) {

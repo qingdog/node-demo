@@ -7,22 +7,31 @@ import v1 from '../router/v1.js'
 // dotenv.config();
 
 const app = express()
-// const cors = require('cors');
-// const corsOptions = {
-//     origin: 'http://example.com', // 允许的源
-//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 允许的方法
-//     credentials: true, // 是否允许发送凭证（如cookies）
-//     optionsSuccessStatus: 204 // 对于预检请求，设置为204表示成功
-// };
-// app.use(cors(corsOptions));
+
+import cors from 'cors'
+const corsOptions = {
+    // origin: /github\.io$|vercel\.com/, // 这里vercel分别部署前后端子域名不同无需配置跨域
+    origin: /github\.io/, // 允许的源使用双斜杠正则匹配
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 允许的方法
+    credentials: true, // 是否允许发送凭证（如cookies）
+    optionsSuccessStatus: 204 // 对于预检请求，设置为204表示成功
+};
+app.use(cors(corsOptions));
+
 // 使用 CORS 中间件，不限制任何源进行跨域请求
 // app.use(cors());
-app.all('*', (_, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
-    res.header('Access-Control-Allow-Headers', 'Content-Type')
-    res.header('Access-Control-Allow-Methods', '*')
-    next()
-})
+
+// app.all('*', (req, res, next) => {
+//     const origin = req.headers.origin;
+//     if (origin.endsWith('github.io') || origin.endsWith('vercel.com')) {
+//         res.header('Access-Control-Allow-Origin', origin);
+//     }
+//     // 跨域需要请求头包含Content-Type
+//     res.header('Access-Control-Allow-Headers', 'Content-Type');
+//     res.header('Access-Control-Allow-Methods', '*');
+//     next();
+// });
+
 
 // 开发环境
 app.use('/proxy', createProxyMiddleware({target: 'https://localhost:8080', changeOrigin: true}));
