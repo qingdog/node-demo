@@ -51,7 +51,7 @@ app.use(express.urlencoded({extended: true}));
 app.get('/api', (req, res) => {
     res.setHeader('Content-Type', 'application/json;charset=utf-8');
     const chatApi = process.env.ENV_CHAT_API;
-    res.json({'secret-edge': chatApi});
+    res.json({'secret-edge1': chatApi});
 });
 
 // 配置vercel重写以下api请求。"rewrites": [{ "source": "/v1(.*)", "destination": "/api/index.js" }]
