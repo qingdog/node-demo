@@ -1,11 +1,21 @@
-﻿export default async (req, res) => {
+﻿import v1 from '../router/v1.js'
+
+// fix.https://github.com/vercel/ai/issues/239
+// ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
+export const config = {
+    // supportsResponseStreaming只能使用export语法
+    supportsResponseStreaming: true,
+	runtime: 'edge',
+}
+
+export default async (req, res) => {
     const { pathname, query } = req;
     if (pathname.startsWith('/proxy')) {
         // 处理代理请求
         // 这里你可以在 Edge Functions 中直接发送请求到目标地址
         // 例如使用 fetch() 函数
         // 例如：
-        const response = await fetch('目标地址');
+        const response = await fetch('https://localhost:8080');
         const data = await response.json();
         res.json(data);
     } else if (pathname === '/api') {
@@ -23,13 +33,3 @@
         res.status(404).send('Not Found');
     }
 };
-
-
-// fix.https://github.com/vercel/ai/issues/239
-// ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
-export const config = {
-    // supportsResponseStreaming只能使用export语法
-    supportsResponseStreaming: true,
-}
-
-// export default app;
