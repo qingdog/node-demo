@@ -1,35 +1,48 @@
-﻿
-// fix.https://github.com/vercel/ai/issues/239
-// ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
+﻿import {GET} from '../router/v1-edge'
 export const config = {
-    // supportsResponseStreaming只能使用export语法
+    runtime: 'edge',
     supportsResponseStreaming: true,
-	runtime: 'edge',
-}
-
-export default async (req, res) => {
-    const { pathname, query } = req;
-	console.log(pathname)
-    if (pathname.startsWith('/proxy')) {
-        // 处理代理请求
-        // 这里你可以在 Edge Functions 中直接发送请求到目标地址
-        // 例如使用 fetch() 函数
-        // 例如：
-        const response = await fetch('https://localhost:8080');
-        const data = await response.json();
-        res.json(data);
-    } else if (pathname === '/api') {
-        // 处理 /api 路径
-        res.setHeader('Content-Type', 'application/json;charset=utf-8');
-        const chatApi = process.env.ENV_CHAT_API;
-        res.json({'secret-edge': chatApi});
-    } else if (pathname.startsWith('/v1')) {
-        // 使用 v1 路由
-        await v1(req, res);
-    } else {
-        // 处理其他未匹配的路径
-        // 这里你可以返回 404 或者其他自定义的响应
-        // 例如：
-        res.status(404).send('Not Found');
-    }
 };
+export default async function handler(request) {
+    const urlParams = new URL(request.url).searchParams;
+    const query = Object.fromEntries(urlParams);
+    const cookies = request.headers.get('cookie');
+    let body;
+
+    const path = new URL(request.url).pathname
+
+
+    let data = null;
+    if (path.match('^/api/?$')) {
+        const chatApi = process.env.ENV_CHAT_API;
+        data = {'secret': chatApi}
+        console.log(data)
+    } else if(path.match('^/v1')){
+        return await GET();
+    } else {
+        console.log(false)
+    }
+
+    // try {
+    //     body = await request.json();
+    // } catch (e) {
+    //     body = null;
+    // }
+
+    data = data || {
+        body,
+        path,
+        query,
+        cookies,
+        urlParams,
+    };
+    return new Response(
+        JSON.stringify(data),
+        {
+            status: 200,
+            headers: {
+                'content-type': 'application/json',
+            },
+        },
+    );
+}

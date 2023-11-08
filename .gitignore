@@ -25,3 +25,4 @@ dist-ssr
 
 # 开发环境
 .env.development
+.vercel
