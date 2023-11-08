@@ -1,5 +1,4 @@
-﻿import v1 from '../router/v1.js'
-
+﻿
 // fix.https://github.com/vercel/ai/issues/239
 // ref.https://github.com/vercel/vercel/blob/main/packages/node/src/index.ts#L495-L511
 export const config = {
