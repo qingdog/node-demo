@@ -10,6 +10,7 @@ export const config = {
 
 export default async (req, res) => {
     const { pathname, query } = req;
+	console.log(pathname)
     if (pathname.startsWith('/proxy')) {
         // 处理代理请求
         // 这里你可以在 Edge Functions 中直接发送请求到目标地址
