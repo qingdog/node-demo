@@ -189,9 +189,8 @@
     let unChunck = '';
     const parseEventSourceResponse = (res => {
         console.info(unChunck + res)
-        unChunck = parseJson(res)
+        unChunck = parseJson(unChunck + res)
     })
-
     const parseJson = str => {
         // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
         const chunks = str.replace(/^data: ({)/gm, '$1').split('\n\n');
@@ -204,6 +203,7 @@
             try {
                 const jsonData = JSON.parse(chunk);
                 chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
+                return '';
             } catch (error) {
                 console.warn('JSON解析失败：', chunk);
                 return chunk;
