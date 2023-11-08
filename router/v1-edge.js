@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     // This encoder will stream your text
     const encoder = new TextEncoder();
-    const customReadable = new ReadableStream({
+    const readableStream = new ReadableStream({
         start(controller) {
             // Start encoding 'Basic Streaming Test',
             // and add the resulting stream to the queue
@@ -42,8 +42,8 @@ export async function GET() {
                 } else if (step === 20) {
                     controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
                     // Prevent anything else being added to the stream
-
                     controller.close();
+
                     clearInterval(time)
                 }
                 step++;
@@ -51,8 +51,7 @@ export async function GET() {
         },
     });
 
-    return new Response(customReadable, {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    return new Response(readableStream, {
+        headers: {'Content-Type': 'text/html; charset=utf-8'},
     });
-
 }
