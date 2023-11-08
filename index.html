@@ -195,14 +195,15 @@
         // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
         const chunks = str.replace(/^data: ({)/gm, '$1').split('\n\n');
         for (const chunk of chunks) {
+            // 分割特性。字符串变成数组后，第一个和最后一个有可能为空字符串
+            if ('' === chunk) continue
             try {
                 // 头尾换行或空格不影响json解析
                 const jsonData = JSON.parse(chunk);
                 chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
             } catch (error) {
                 console.warn('JSON解析失败：', chunk);
-                // 分割特性。字符串变成数组后，第一个和最后一个有可能为空字符串
-                if ('' === chunk || '\n' === chunk || chunk.startsWith(':')) continue
+                if ('\n' === chunk || chunk.startsWith(':')) continue
                 if ('data: [DONE]' === chunk) {
                     console.warn('流已完成！' + chunk)
                     break

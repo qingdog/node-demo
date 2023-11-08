@@ -33,13 +33,13 @@ export async function GET() {
 
             let step = 0;
             const time = setInterval(() => {
-                if (step <= 18) {
+                if (step <= 110) {
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(resData)}\n\n`));
-                } else if (step === 19) {
+                } else {
                     resData.choices[resData.choices.length - 1].delta.content = undefined
                     resData.choices[resData.choices.length - 1].finish_reason = 'stop'
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(resData)}\n\n`));
-                } else if (step === 20) {
+
                     controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
                     // Prevent anything else being added to the stream
                     controller.close();
