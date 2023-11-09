@@ -119,7 +119,7 @@
             }),
             // 处理响应数据
             onmessage: (res) => {
-                unChunck = parseStreamResponse(unChunck + res);
+                unChunck = parseStreamResponse(res);
                 // console.log(res);
             },
         }).then((text) => {
@@ -284,10 +284,10 @@
                 options.onopen && options.onopen()
                 return response.body
             }
-        }).then(rb => {
+        }).then(body => {
             clearTimeout(this.timer); // 拿到结果，清除 timeout 计时器
 
-            const reader = rb.getReader()
+            const reader = body.getReader()
             const push = () => {
                 // done 为数据流是否接收完成，boolean // value 为返回数据，Uint8Array
                 return reader.read().then(({done, value}) => {
