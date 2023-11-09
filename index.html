@@ -181,8 +181,7 @@
             try {
                 let value;
                 while (!({value} = await reader.read()).done) {
-                    console.error(value)
-                    onmessage?.(decoder.decode(value));
+                    onmessage?.(Uint8ArrayToString(value));
                 }
             } catch (e) {
                 console.error('错误：', e)
