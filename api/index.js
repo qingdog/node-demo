@@ -30,8 +30,6 @@ export default async function handler(request) {
         console.log(false)
     }
 
-
-
     data = data || {
         body,
         path,
