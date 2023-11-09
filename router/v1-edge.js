@@ -109,7 +109,7 @@ export async function chat(responseBody) {
             Authorization: 'Bearer ' + chatApiSecret,
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
         }, responseType: 'stream', //signal: controller.signal, //fetch接收 controller 的信号用于abort
         body: JSON.stringify(data), // body: data,
         onopen: () => {
