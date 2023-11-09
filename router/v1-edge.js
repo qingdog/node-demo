@@ -178,7 +178,7 @@ const fetchStream = async (url, params) => {
                             // console.log(decoder.decode(value))
                             const code = decoder.decode(value)
                             console.log(code)
-                            controller.enqueue(encoder.encoding(code)); //ReadableStream流写入
+                            controller.enqueue(encoder.encode(code)); //ReadableStream流写入
                         }
                         // ReadableStream流写入完毕
                         controller.close();
