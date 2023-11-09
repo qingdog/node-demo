@@ -171,7 +171,7 @@ const fetchStream = async (url, params) => {
                     try {
                         const decoder = new TextDecoder();
                         const encoder = new TextEncoder();
-                        controller.enqueue(encoder.encode('你好！有什么我可以帮助你的吗？')); //ReadableStream流写入
+                        controller.enqueue(encoder.encode('data: {"mes": "你好！有什么我可以帮助你的吗？"}\n\n')); //ReadableStream流写入
                         while (!({value} = await reader.read()).done) {
                             // 读取响应流处理
                             //onmessage?.(value);
