@@ -120,7 +120,7 @@ export async function chat(responseBody) {
             // console.log(res);
         }, onclose: () => {
             // 连接关闭
-            console.log(parseResponseJson)
+            console.info(parseResponseJson)
             parseResponseJson = ''
         }
     }).then(responseReader => {
@@ -219,8 +219,7 @@ const parseStreamResponse = str => {
                 // console.info('流已完成！' + chunk)
                 return '';
             }
-
-            console.warn('JSON解析失败：', chunk);
+            // console.warn('JSON解析失败：', chunk);
             return chunk;
         }
     }
