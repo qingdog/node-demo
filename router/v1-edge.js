@@ -19,16 +19,11 @@ export async function GET() {
                 "object": "chat.completion.chunk",
                 "created": 1694522818,
                 "model": "gpt-3.5-turbo-0301",
-                "choices": [
-                    {
-                        "index": 0,
-                        "delta": {
-                            "role": "assistant",
-                            "content": "嘿"
-                        },
-                        "finish_reason": null
-                    }
-                ]
+                "choices": [{
+                    "index": 0, "delta": {
+                        "role": "assistant", "content": "嘿"
+                    }, "finish_reason": null
+                }]
             }
 
             let step = 0;
@@ -57,17 +52,12 @@ export async function GET() {
 }
 
 let requestBodyData = {
-    messages: [
-        {
-            role: "system",
-            content:
-                "You are ChatGPT, a large language model trained by OpenAI.\nCarefully heed the user's instructions. \nRespond using Markdown.",
-        },
-        {
-            role: "user",
-            content: '你好',
-        },
-    ],
+    messages: [{
+        role: "system",
+        content: "You are ChatGPT, a large language model trained by OpenAI.\nCarefully heed the user's instructions. \nRespond using Markdown.",
+    }, {
+        role: "user", content: '你好',
+    },],
     model: "gpt-3.5-turbo",
     max_tokens: null,
     temperature: 1,
@@ -104,43 +94,40 @@ export async function chat(responseBody) {
         data = requestBodyData
         data.messages[1].content = responseBody.mes;
     }
+    console.info(data.messages?.[data.messages.length - 1])
 
     // 使用自定义 fetch 发起请求
     const chatApi = process.env.ENV_CHAT_API
     const chatUri = process.env.ENV_CHAT_URI;
     const chatApiSecret = process.env.ENV_CHAT_API_SECRET;
 
-    let readableStream
+    let unChunck = '';
+    const decoder = new TextDecoder();
     const responseReader = await fetchStream(chatApi + chatUri, {
-        method: 'POST',
-        headers: {
-            accept: 'text/event-stream',
-            'Content-Type': 'application/json',
+        method: 'POST', headers: {
+            Accept: 'text/event-stream',
             Authorization: 'Bearer ' + chatApiSecret,
             'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive'
-        },
-        responseType: 'stream',
-        // signal: controller.signal, //fetch接收 controller 的信号用于abort
-        body: JSON.stringify(data),
-        // body: data,
+            Connection: 'keep-alive',
+            'Content-Type': 'application/json',
+        }, responseType: 'stream', // signal: controller.signal, //fetch接收 controller 的信号用于abort
+        body: JSON.stringify(data), // body: data,
         onopen: () => {
             // 连接成功
-            console.log(2222222)
-        },
-        // 处理响应数据
+        }, // 处理响应数据
         onmessage: (res) => {
-            const readableStream = parseStreamResponse(res);
+            // 分块可能出现不完整的一行，所以和下一次响应的分块拼接后再解析成json格式
+            unChunck = parseStreamResponse(unChunck + decoder.decode(res));
             // console.log(res);
-        },
-        onclose: () => {
+        }, onclose: () => {
             // 连接关闭
+            console.log(parseResponseJson)
+            parseResponseJson = ''
         }
     }).then(responseReader => {
         // 响应完成后执行
         //chatContent.textContent = text;
         // responseStream(responseReader);
-        console.log('responseReader...')
         return responseReader
     }).catch((error) => {
         console.error('发生错误：', error);
@@ -149,19 +136,7 @@ export async function chat(responseBody) {
     return new Response(responseReader, {
         headers: {'Content-Type': 'text/html; charset=utf-8'},
     });
-
-
-    // return new Response(
-    //     JSON.stringify(data),
-    //     {
-    //         status: 200,
-    //         headers: {
-    //             'content-type': 'application/json',
-    //         },
-    //     },
-    // );
 }
-
 
 /**
  * 基于fetch 自定义封装的fetch请求
@@ -173,26 +148,6 @@ const fetchStream = async (url, params) => {
     timeout(); // 开启超时计时器
     const {onopen, onmessage, onclose, ...otherParams} = params;
 
-    /*废弃
-    const textDecoder = new TextDecoder();
-    const readableStreamstartEnqueue = async (controller, reader) => {
-        const {value, done} = await reader.read();
-        if (done) {
-            controller.close();
-            // 此处没有定义该函数onclose，可以不执行
-            onclose?.();
-        } else {
-            // onmessage?.(Uint8ArrayToString(value));
-            // 执行传入的自定义函数（如果存在） TextDecoder解码读取的二进制数据Uint8Array 为文本string
-            onmessage?.(textDecoder.decode(value));
-
-            // 将一个值传递到流中以供读取。这相当于向流中推入一个数据块。类似追加入队
-            controller.enqueue(value);
-            // 递归调用处理响应reader.read
-            await readableStreamstartEnqueue(controller, reader);
-        }
-    };*/
-
     return await fetch(url, otherParams)
         .then(async response => {
             clearTimeout(timer); // 拿到结果，清除 timeout 计时器
@@ -201,34 +156,30 @@ const fetchStream = async (url, params) => {
             }
 
             const reader = response.body.getReader();
-            /* 这里把fetch的text/event-stream流又套了一层流进行处理 response数据
-            const stream = new ReadableStream({
-                start(controller) {
-                    readableStreamstartEnqueue(controller, readableStreamDefaultReader);
-                },
-            });*/
 
-            reader.closed.then(
-                () => console.info('reader.closed'),
-                () => console.warn('reader 读取出错了')
-            );
+            reader.closed.then(value => {
+                // 此处若没有定义该函数onclose可不执行
+                onclose?.();
+                console.info('ReadableStreamDefaultReader.closed.fulfilled......')
+            }, reason => {
+                console.warn('ReadableStreamDefaultReader.closed.onrejected-读取出错了！')
+                console.warn(reason)
+            });
 
-            const decoder = new TextDecoder();
+            // 这里把fetch的text/event-stream流又套了一层流进行处理 response数据
             return new ReadableStream({
                 async start(controller) {
 
-                    // controller.close();
-
                     let value;
                     try {
+                        // const decoder = new TextDecoder();
                         while (!({value} = await reader.read()).done) {
                             // 读取响应流处理
                             onmessage?.(value);
-
                             // console.log(decoder.decode(value))
-
-                            controller.enqueue(value);
+                            controller.enqueue(value); //ReadableStream流写入
                         }
+                        // ReadableStream流写入完毕
                         controller.close();
                     } catch (e) {
                         console.error('错误：', e)
@@ -243,38 +194,16 @@ const fetchStream = async (url, params) => {
             console.warn(e)
         }).finally(() => {
         })
-
 };
 
 
-const responseStream = (responseReader => {
-
-    console.log(7777777777)
-    // 不解码保持原样响应出去
-    return new Response(responseReader, {
-        headers: {'Content-Type': 'text/html; charset=utf-8'},
-    });
-})
-
-let unChunck = '';
-/**
- * 处理响应流
- * @type {parseStreamResponse}
- */
-const parseStreamResponse = (resData => {
-    console.log('...')
-
-
-    // 不解析
-    // const decoder = new TextDecoder();
-    // unChunck = parseJson(unChunck + decoder.decode(res))
-})
+let parseResponseJson = ''
 /**
  * 解析 EventSource 格式为 json
  * @param str
  * @returns {*|string}
  */
-const parseJson = str => {
+const parseStreamResponse = str => {
     // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
     const chunks = str.replace(/^data: ({)/gm, '$1').split('\n\n');
     for (const chunk of chunks) {
@@ -283,15 +212,15 @@ const parseJson = str => {
         try {
             // 头尾换行或空格不影响json解析
             const jsonData = JSON.parse(chunk);
-            chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
+            parseResponseJson += jsonData.choices?.[0]?.delta?.content || ''
         } catch (error) {
-            console.warn('JSON解析失败：', chunk);
             if ('\n' === chunk || chunk.startsWith(':')) continue
             if ('data: [DONE]' === chunk) {
-                console.info('流已完成！' + chunk)
-                break
+                // console.info('流已完成！' + chunk)
+                return '';
             }
 
+            console.warn('JSON解析失败：', chunk);
             return chunk;
         }
     }

@@ -107,7 +107,7 @@
 
         let unChunck = '';
         // 自定义
-        fetchStream(`/v1/`, {
+        fetchStream(`/v1/chat/completions`, {
             method: 'POST',
             headers: {
                 accept: 'text/event-stream',
@@ -118,7 +118,7 @@
             }),
             // 处理响应数据
             onmessage: (res) => {
-                unChunck = parseEventSourceResponse(unChunck + res);
+                unChunck = parseStreamResponse(unChunck + res);
                 // console.log(res);
             },
         }).then((text) => {
@@ -199,7 +199,7 @@
     };
 
     // 解析EventSource格式字符串流响应
-    const parseEventSourceResponse = str => {
+    const parseStreamResponse = str => {
         console.info(str)
         // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
         const chunks = str.replace(/^data: ({)/gm, '$1').split('\n\n');
@@ -211,12 +211,12 @@
                 const jsonData = JSON.parse(chunk);
                 chatContent.innerHTML += (jsonData.choices?.[0]?.delta?.content || '').replaceAll(/\n/g, "<br>");
             } catch (error) {
-                console.warn('JSON解析失败：', chunk);
                 if ('\n' === chunk || chunk.startsWith(':')) continue
                 if ('data: [DONE]' === chunk) {
                     console.info('流已完成！' + chunk)
                     return '';
                 }
+                console.warn('JSON解析失败：', chunk);
                 return chunk;
             }
         }
