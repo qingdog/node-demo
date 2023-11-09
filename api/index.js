@@ -1,4 +1,4 @@
-﻿import {GET} from '../router/v1-edge'
+﻿import {GET, chat} from '../router/v1-edge'
 export const config = {
     runtime: 'edge',
     supportsResponseStreaming: true,
@@ -17,8 +17,11 @@ export default async function handler(request) {
         const chatApi = process.env.ENV_CHAT_API;
         data = {'secret': chatApi}
         console.log(data)
-    } else if(path.match('^/v1')){
+    } else if (path.match('^/v1/?$')) {
         return await GET();
+    }  else if (path.match('^/v1/')) {
+        body = await request.json();
+        return await chat(body);
     } else {
         console.log(false)
     }

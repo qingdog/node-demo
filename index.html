@@ -25,17 +25,17 @@
     const fetchSendButton = document.getElementById('fetchSend');
     const customSendButton = document.getElementById('customSend');
 
-    // EventSource 对象发送。原生EventSource只支持GET请求
+    // 1.EventSource 对象发送。原生EventSource只支持GET请求
     eventSendButton.addEventListener('click', () => {
         connectFetch()
     });
 
-    // fetch发送请求
+    // 2.fetch发送请求
     const chatContent = document.querySelector('.chat')
     fetchSendButton.addEventListener('click', () => {
         const message = messageInput.value;
         fetch(`/v1/chat/completions`, {
-            method: 'post',
+            method: 'POST',
             headers: {
                 accept: 'text/event-stream',
                 'Content-Type': 'application/json',
@@ -68,6 +68,7 @@
                     reader.read().then(processValue);
                 });
             }
+
             // 这里把reader.read()的返回值作为参数 processValue为回调函数
             reader.read().then(processValue);
         });
@@ -100,11 +101,13 @@
         }
     }
 
-    // 自定义封装fetch 请求
+    // 3.自定义封装fetch 请求
     customSendButton.addEventListener('click', () => {
         const message = messageInput.value;
+
+        let unChunck = '';
         // 自定义
-        fetchStream(`/v1/chat/completions`, {
+        fetchStream(`/v1/`, {
             method: 'POST',
             headers: {
                 accept: 'text/event-stream',
@@ -115,7 +118,7 @@
             }),
             // 处理响应数据
             onmessage: (res) => {
-                parseEventSourceResponse(res);
+                unChunck = parseEventSourceResponse(unChunck + res);
                 // console.log(res);
             },
         }).then((text) => {
@@ -123,7 +126,8 @@
             //chatContent.textContent = text;
         }).catch((error) => {
             console.error('发生错误：', error);
-        });
+        }).finally(() => {
+        })
     });
     /**
      * 基于fetch/ReadableStream 自定义封装的fetch请求
@@ -132,9 +136,12 @@
      * @returns
      */
     const fetchStream = (url, params) => {
+        timeout(); // 开启超时计时器
+
         const {onmessage, onclose, ...otherParams} = params;
 
         const textDecoder = new TextDecoder();
+        // 废弃
         const readableStreamstartEnqueue = async (controller, reader) => {
             const {value, done} = await reader.read();
             if (done) {
@@ -154,7 +161,9 @@
         };
 
         return fetch(url, otherParams).then(async (response) => {
-            const readableStreamDefaultReader = response.body.getReader();
+            clearTimeout(this.timer); // 拿到结果，清除 timeout 计时器
+
+            const reader = response.body.getReader();
             // 这里把fetch的text/event-stream流又套了一层流进行处理 response数据
             /*const stream = new ReadableStream({
                 start(controller) {
@@ -162,36 +171,36 @@
                 },
             });*/
 
-            readableStreamDefaultReader.closed.then(
-                () => console.info('readableStreamDefaultReader.closed'),
-                () => console.warn('readableStreamDefaultReader读取出错了')
+            reader.closed.then(
+                () => console.info('reader.closed'),
+                () => console.warn('reader 读取出错了')
             );
 
             const decoder = new TextDecoder();
-            let value;
             try {
-                while (!({value} = await readableStreamDefaultReader.read()).done) {
+                let value;
+                while (!({value} = await reader.read()).done) {
                     onmessage?.(decoder.decode(value));
                 }
-                return readableStreamDefaultReader;
             } catch (e) {
                 console.error('错误：', e)
             } finally {
-                readableStreamDefaultReader.releaseLock() //出现异常时需要此处关闭
+                reader.releaseLock() //出现异常时需要此处关闭
             }
 
-            return readableStreamDefaultReader;
-            // 之前把数据enqueue入队进入流中了，现在可使用Response进行转换为文本（文本解码），这里只是收集流中所有数据可不执行
-        })//.then((stream) => new Response(stream, {headers: {'Content-Type': 'text/html'}}).text());
+            return reader;
+
+        }).catch(e => {
+            console.error('解析出现错误！', e)
+        }).finally(() => {
+        })
+        // 之前把数据enqueue入队进入流中了，现在可使用Response进行转换为文本（文本解码），这里只是收集流中所有数据可以不用
+        //.then((stream) => new Response(stream, {headers: {'Content-Type': 'text/html'}}).text());
     };
 
     // 解析EventSource格式字符串流响应
-    let unChunck = '';
-    const parseEventSourceResponse = (res => {
-        console.info(unChunck + res)
-        unChunck = parseJson(unChunck + res)
-    })
-    const parseJson = str => {
+    const parseEventSourceResponse = str => {
+        console.info(str)
         // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
         const chunks = str.replace(/^data: ({)/gm, '$1').split('\n\n');
         for (const chunk of chunks) {
@@ -205,10 +214,9 @@
                 console.warn('JSON解析失败：', chunk);
                 if ('\n' === chunk || chunk.startsWith(':')) continue
                 if ('data: [DONE]' === chunk) {
-                    console.warn('流已完成！' + chunk)
-                    break
+                    console.info('流已完成！' + chunk)
+                    return '';
                 }
-
                 return chunk;
             }
         }
@@ -296,7 +304,8 @@
         }).catch((e) => {
             options.error && options.error(e)
         })
-    } </script>
+    }
+</script>
 
 </body>
 </html>
