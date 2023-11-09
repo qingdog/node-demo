@@ -21,14 +21,14 @@ export async function GET() {
                 "model": "gpt-3.5-turbo-0301",
                 "choices": [{
                     "index": 0, "delta": {
-                        "role": "assistant", "content": "嘿"
+                        "role": "assistant", "content": "你好！有什么我可以帮助你的吗？"
                     }, "finish_reason": null
                 }]
             }
 
             let step = 0;
             const time = setInterval(() => {
-                if (step < 110) {
+                if (step < 10) {
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(resData)}\n\n`));
                 } else {
                     resData.choices[resData.choices.length - 1].delta.content = undefined
