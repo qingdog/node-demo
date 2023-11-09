@@ -87,11 +87,8 @@ function timeout(time = 100000) {
 }
 
 export async function chat(responseBody) {
-    let data;
-    if (responseBody.messages) {
-        data = responseBody;
-    } else {
-        data = requestBodyData
+    let data = requestBodyData
+    if (responseBody?.mes) {
         data.messages[1].content = responseBody.mes;
     }
     console.info(data.messages?.[data.messages.length - 1])
@@ -175,9 +172,9 @@ const fetchStream = async (url, params) => {
                         const encoder = new TextEncoder();
                         while (!({value} = await reader.read()).done) {
                             // 读取响应流处理
-                            onmessage?.(value);
+                            //onmessage?.(value);
                             // console.log(decoder.decode(value))
-                            controller.enqueue(encoder.encode(decoder.decode(value))); //ReadableStream流写入
+                            controller.enqueue(value); //ReadableStream流写入
                         }
                         // ReadableStream流写入完毕
                         controller.close();

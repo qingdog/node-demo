@@ -20,17 +20,17 @@ export default async function handler(request) {
     } else if (path.match('^/v1/?$')) {
         return await GET();
     }  else if (path.match('^/v1/')) {
-        body = await request.json();
+        try {
+            body = await request.json();
+        } catch (e) {
+            body = null;
+        }
         return await chat(body);
     } else {
         console.log(false)
     }
 
-    // try {
-    //     body = await request.json();
-    // } catch (e) {
-    //     body = null;
-    // }
+
 
     data = data || {
         body,
