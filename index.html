@@ -34,7 +34,7 @@
     const chatContent = document.querySelector('.chat')
     fetchSendButton.addEventListener('click', () => {
         const message = messageInput.value;
-        fetch(`/v1/chat/completions`, {
+        fetch(`/v1`, {
             method: 'POST',
             headers: {
                 accept: 'text/event-stream',
