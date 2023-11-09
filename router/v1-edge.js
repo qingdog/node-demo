@@ -88,7 +88,7 @@ function timeout(time = 100000) {
 
 export async function chat(responseBody) {
     let data;
-    if (responseBody.message) {
+    if (responseBody.messages) {
         data = responseBody;
     } else {
         data = requestBodyData
@@ -110,12 +110,11 @@ export async function chat(responseBody) {
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Content-Type': 'application/json',
-        }, responseType: 'stream', // signal: controller.signal, //fetch接收 controller 的信号用于abort
+        }, responseType: 'stream', //signal: controller.signal, //fetch接收 controller 的信号用于abort
         body: JSON.stringify(data), // body: data,
         onopen: () => {
             // 连接成功
-        }, // 处理响应数据
-        onmessage: (res) => {
+        }, onmessage: (res) => {// 处理响应数据
             // 分块可能出现不完整的一行，所以和下一次响应的分块拼接后再解析成json格式
             unChunck = parseStreamResponse(unChunck + decoder.decode(res));
             // console.log(res);
@@ -134,7 +133,7 @@ export async function chat(responseBody) {
     })
 
     return new Response(responseReader, {
-        headers: {'Content-Type': 'text/html; charset=utf-8'},
+        headers: {'Content-Type': 'text/html; charset=UTF-8'},
     });
 }
 
@@ -172,12 +171,13 @@ const fetchStream = async (url, params) => {
 
                     let value;
                     try {
-                        // const decoder = new TextDecoder();
+                        const decoder = new TextDecoder();
+                        const encoder = new TextEncoder();
                         while (!({value} = await reader.read()).done) {
                             // 读取响应流处理
                             onmessage?.(value);
                             // console.log(decoder.decode(value))
-                            controller.enqueue(value); //ReadableStream流写入
+                            controller.enqueue(encoder.encode(decoder.decode(value))); //ReadableStream流写入
                         }
                         // ReadableStream流写入完毕
                         controller.close();
