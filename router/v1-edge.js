@@ -87,8 +87,9 @@ function timeout(time = 100000) {
 }
 
 export async function chat(responseBody) {
-    let data = requestBodyData
+    let data = responseBody
     if (responseBody?.mes) {
+        data = requestBodyData
         data.messages[1].content = responseBody.mes;
     }
     console.info(data.messages?.[data.messages.length - 1])
