@@ -181,8 +181,9 @@
             try {
                 let value;
                 while (!({value} = await reader.read()).done) {
-                    const code = decoder.decode(value);
-                    onmessage?.(code);
+                    const text = decoder.decode(value, { stream: true });
+                    console.info(text)
+                    onmessage?.(text);
                 }
             } catch (e) {
                 console.error('错误：', e)
