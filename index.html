@@ -181,7 +181,9 @@
             try {
                 let value;
                 while (!({value} = await reader.read()).done) {
-                    onmessage?.(decoder.decode(value));
+                    const code = decoder.decode(value);
+                    console.log(code)
+                    onmessage?.(code);
                 }
             } catch (e) {
                 console.error('错误：', e)
@@ -201,7 +203,7 @@
 
     // 解析EventSource格式字符串流响应
     const parseStreamResponse = str => {
-        console.info(str)
+        // console.info(str)
         // 去除每一行（全局多行匹配gm） "data: " 前缀（如果存在），根据 SSE 规范，每个消息以两个换行符分隔。
         const chunks = str.replace(/^data: ({)/gm, '$1').split('\n\n');
         for (const chunk of chunks) {
