@@ -182,7 +182,6 @@
                 let value;
                 while (!({value} = await reader.read()).done) {
                     const code = decoder.decode(value);
-                    console.log(code)
                     onmessage?.(code);
                 }
             } catch (e) {
