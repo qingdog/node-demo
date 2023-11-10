@@ -177,7 +177,7 @@
                 () => console.warn('reader 读取出错了')
             );
 
-            const decoder = new TextDecoder();
+            const decoder = new TextDecoder('utf-8');
             try {
                 let value;
                 while (!({value} = await reader.read()).done) {
