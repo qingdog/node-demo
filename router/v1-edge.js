@@ -164,19 +164,19 @@ const fetchStream = async (url, params) => {
             });
 
             // 这里把fetch的text/event-stream流又套了一层流进行处理 response数据
-             return new  ReadableStream({
+            return new ReadableStream({
                 async start(controller) {
 
                     let value;
                     try {
-                        const decoder = new TextDecoder('UTF-8');
+                        const decoder = new TextDecoder();
                         const encoder = new TextEncoder();
-                        // controller.enqueue(encoder.encode('data: {"mes": "你好！有什么我可以帮助你的吗？"}\n\n')); //ReadableStream流写入
+                        controller.enqueue(encoder.encode('data: {"mes": "你好！有什么我可以帮助你的吗？"}\n\n')); //ReadableStream流写入
                         while (!({value} = await reader.read()).done) {
                             // 读取响应流处理
                             onmessage?.(value);
                             // console.log(decoder.decode(value))
-                            const code = decoder.decode(value)//.toString('UTF-8')
+                            const code = decoder.decode(value)
                             controller.enqueue(encoder.encode(code)); //ReadableStream流写入
                         }
                         // ReadableStream流写入完毕
