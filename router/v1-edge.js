@@ -164,19 +164,19 @@ const fetchStream = async (url, params) => {
             });
 
             // 这里把fetch的text/event-stream流又套了一层流进行处理 response数据
-             const readableStream = new ReadableStream({
+             return new  ReadableStream({
                 async start(controller) {
 
                     let value;
                     try {
-                        const decoder = new TextDecoder();
+                        const decoder = new TextDecoder('UTF-8');
                         const encoder = new TextEncoder();
-                        controller.enqueue(encoder.encode('data: {"mes": "你好！有什么我可以帮助你的吗？"}\n\n')); //ReadableStream流写入
+                        // controller.enqueue(encoder.encode('data: {"mes": "你好！有什么我可以帮助你的吗？"}\n\n')); //ReadableStream流写入
                         while (!({value} = await reader.read()).done) {
                             // 读取响应流处理
                             onmessage?.(value);
                             // console.log(decoder.decode(value))
-                            const code = decoder.decode(value)
+                            const code = decoder.decode(value).toString('UTF-8')
                             controller.enqueue(encoder.encode(code)); //ReadableStream流写入
                         }
                         // ReadableStream流写入完毕
@@ -188,8 +188,6 @@ const fetchStream = async (url, params) => {
                     }
                 },
             });
-
-            return readableStream
             // 之前把数据enqueue入队进入流中了，现在可使用Response进行转换为文本（文本解码），这里只是收集流中所有数据可以不用
             //.then((stream) => new Response(stream, {headers: {'Content-Type': 'text/html'}}).text());
         }).catch(e => {
