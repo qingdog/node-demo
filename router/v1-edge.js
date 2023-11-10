@@ -87,9 +87,8 @@ function timeout(time = 100000) {
 }
 
 export async function chat(responseBody) {
-    let data = responseBody
-    if (responseBody?.mes) {
-        data = requestBodyData
+    let data = requestBodyData
+    if (responseBody?.mes !== undefined) {
         data.messages[1].content = responseBody.mes;
     }
     console.info(data.messages?.[data.messages.length - 1])
@@ -108,8 +107,9 @@ export async function chat(responseBody) {
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Content-Type': 'application/json; charset=UTF-8',
-        }, responseType: 'stream', //signal: controller.signal, //fetch接收 controller 的信号用于abort
-        body: JSON.stringify(data), // body: data,
+        }, responseType: 'stream', // 这里vercel平台edge functions不支持使用fetch请求的signal参数
+        // signal: controller.signal, //fetch接收 controller 的信号用于abort
+        body: JSON.stringify(data),
         onopen: () => {
             // 连接成功
         }, onmessage: (res) => {// 处理响应数据

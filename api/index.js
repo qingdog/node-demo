@@ -3,7 +3,16 @@ export const config = {
     runtime: 'edge',
     supportsResponseStreaming: true,
 };
-export default async function handler(request) {
+export default async function handler(request ,req) {
+    const res = request
+
+    const allowedOrigins = ['https://qingdog.github.io', 'https://another-example.com'];
+    const origin = req.headers.origin;
+
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+
     const urlParams = new URL(request.url).searchParams;
     const query = Object.fromEntries(urlParams);
     const cookies = request.headers.get('cookie');

@@ -181,6 +181,7 @@
             try {
                 let value;
                 while (!({value} = await reader.read()).done) {
+                    // 流解码防止字符被截断出现乱码（这里用于vercel平台edge functions）
                     const text = decoder.decode(value, { stream: true });
                     console.info(text)
                     onmessage?.(text);
