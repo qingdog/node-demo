@@ -1,3 +1,7 @@
+> 遗留问题：edge function边缘函数跨域问题。
+> 
+> serverful 无服务器函数在hobby爱好者计划响应时长最长10s
+
 [vercel] https://vercel.com/docs/functions/serverless-functions/runtimes/node-js#using-express-with-vercel
 
 ## 将 Express.js 与 Vercel 结合使用
